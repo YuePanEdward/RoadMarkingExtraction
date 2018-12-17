@@ -14,4 +14,4 @@ Author：Yue Pan et al. @ WHU
 2.Input the resolution for projected image (unit: meter)
 
 ## Demo
- ![alt text](.jpg)
+ ![alt text](MLSdemo.JPG)
