@@ -5,8 +5,11 @@ A C++ Program for automatically extraction of road markings from MLS or ALS poin
 
 ## About
 Compile with VS2013 x64 Release or Debug
+
 Dependent 3rd Party Libs:  PCL 1.8, OpenCV 2 , LibLas
+
 Application Scenarios: MLS，ALS
+
 Author：Yue Pan et al. @ WHU
 
 ## How to use
