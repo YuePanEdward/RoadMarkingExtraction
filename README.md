@@ -11,6 +11,7 @@ Author：Yue Pan et al. @ WHU
 
 ## How to use
 1.Import a las file
+
 2.Input the resolution for projected image (unit: meter)
 
 ## Demo
