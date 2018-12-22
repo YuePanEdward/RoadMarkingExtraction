@@ -20,4 +20,4 @@ Author：Yue Pan et al. @ WHU
 ## Demo
  ![alt text](MLSdemo.JPG)
  
- ![alt text](MLSdemo2.JPG)
+ ![alt text](Markerdemo.JPG)
