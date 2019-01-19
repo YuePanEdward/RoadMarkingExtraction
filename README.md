@@ -1,7 +1,7 @@
 # RoadMarkingExtraction
 A C++ Program for automatically extraction of road markings from MLS or ALS point cloud
 
-### Under Development
+### Under Development (V_1.0.1)
 
 ## About
 Compile with VS2013 x64 Release or Debug
@@ -10,7 +10,9 @@ Dependent 3rd Party Libs:  PCL 1.8, OpenCV 2 , LibLas, DXFLib
 
 Application Scenarios: MLS，ALS point cloud , Highway and City roads
 
-Author：Yue Pan et al. @ WHU
+Author：Yue Pan et al. @ WHU 
+
+To contact the author, please email to panyue@whu.edu.cn
 
 ## How to use
 1.Import a las file
