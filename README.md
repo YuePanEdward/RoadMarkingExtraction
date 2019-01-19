@@ -31,8 +31,8 @@ To contact the author, please email to panyue@whu.edu.cn
  
  ![alt text](demo/3.JPG)
  
+ ![alt text](demo/6.JPG)
+ 
  ![alt text](demo/4.JPG)
  
  ![alt text](demo/5.JPG)
- 
- ![alt text](demo/6.JPG)
