@@ -27,7 +27,7 @@ int main()
 	//Dependent 3rd Party Libs:  PCL 1.8, OpenCV 2 , LibLas, VTK, LibBoost, DXFLib
 	//Point Cloud Acquisition Platform: MLS, TLS, ALS (Developing)
 	//Application Scenarios: Highway, City Road
-	//Author：Yue Pan et al. @ WHU
+	//Author锛歒ue Pan et al. @ WHU
 
 	//Consuming time : For MLS point cloud with about 10 million points
 	//                 20 seconds with ground segmentation (recommended) 
@@ -383,11 +383,5 @@ int main()
 
 	/*-----------------------------------------------------------------------------------------------------------*/
 
-
-	//任务表;
-	//提供轨迹文件处理接口，有轨迹的话找路面点就容易多了;
-	//模板制作;
-	//提供las 输出，ply输入等;
-	//文件夹批处理;
 
 }
