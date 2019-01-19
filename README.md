@@ -18,10 +18,10 @@ Author：Yue Pan et al. @ WHU
 2.Input the resolution for projected image (unit: meter)
 
 ## Workflow
- ![alt text](principle1.jpg)
+ ![alt text](demo/1.jpg)
 
 ## Demo
- ![alt text](show001.JPG)
+ ![alt text](demo/2.JPG)
  
  ![alt text](show003.JPG)
  
