@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "imageprocess.h" 
 #include <numeric>
 
@@ -71,14 +72,54 @@ void Imageprocess::savepcgrid(vector<double> &boundingbox, float resolution, con
 	}
 
 }
-void Imageprocess::pc2imgI(const pcXYZIPtr &cloud, int whatcloud, Mat &img ){
+
+void Imageprocess::savepcgrid(vector<double> &boundingbox, float resolution, const pcXYZIPtr &c)
+{
+	float lx, ly;
+	int ix, iy;
+	lx = boundingbox[3] - boundingbox[0];
+	ly = boundingbox[4] - boundingbox[1];
+
+	minX = boundingbox[0];
+	minY = boundingbox[1];
+	minZ = boundingbox[2];
+
+	nx = lx / resolution + 1;
+	ny = ly / resolution + 1;
+
+	res = resolution;
+
+	cout << "Image Size: " << nx << " * " << ny << endl;
+
+	CMatrixIndice.resize(nx);
 	
 
-	float mini,maxi;  //min and max Intensity
+	for (size_t i = 0; i < nx; i++){
+		CMatrixIndice[i].resize(ny);
+	}
+
+	//Saving point indices  (遍历一次点云 [耗时],想办法地面分割的时候存点序号，这样就不用再遍历两遍了）
+	for (size_t i = 0; i < c->points.size(); i++){
+		ix = (c->points[i].x - minX) / res;
+		iy = (c->points[i].y - minY) / res;
+		CMatrixIndice[ix][iy].push_back(i);
+	}
+}
+
+void Imageprocess::pc2imgI(const pcXYZIPtr &cloud, int whatcloud, Mat &img, float times_std ){
+	
+
+	double mini,maxi;  //min and max Intensity
+	double meani, stdi; //mean and standard deviation of Intensity
+	int Number_non_zero_pixel;
+	
+	meani = 0;
+	stdi = 0;
+	Number_non_zero_pixel = 0;
 
 	img.create(nx, ny, CV_8UC1); //分配内存
-    mini = FLT_MAX;
-    maxi = -FLT_MAX;
+    //mini = FLT_MAX;
+    //maxi = -FLT_MAX;
 
 	vector<vector<vector<float>>> matrixi;	
 	vector<vector<float>> ave;
@@ -123,7 +164,7 @@ void Imageprocess::pc2imgI(const pcXYZIPtr &cloud, int whatcloud, Mat &img ){
 
 	for (int i = 0; i < nx; i++){
 		for (int j = 0; j < ny; j++){
-			ave[i][j] = (0.1 + accumulate(begin(matrixi[i][j]), end(matrixi[i][j]), 0.0)) / matrixi[i][j].size();
+			ave[i][j] = (0.01 + accumulate(begin(matrixi[i][j]), end(matrixi[i][j]), 0.0)) / matrixi[i][j].size();
 			//格网里点再取平均
 		}
 	}
@@ -132,18 +173,35 @@ void Imageprocess::pc2imgI(const pcXYZIPtr &cloud, int whatcloud, Mat &img ){
 	{
 		for (int j = 0; j < ny; j++)
 		{
-			maxi = max(maxi, ave[i][j]);
-			mini = min(mini, ave[i][j]);
+			if (ave[i][j]>1) {
+				meani += ave[i][j];
+				Number_non_zero_pixel++;
+			}
 		}
-	}// 求取最大，最小格网平均反射强度
-
+	}
+	meani /= Number_non_zero_pixel;
 
 	for (int i = 0; i < nx; i++)
 	{
 		for (int j = 0; j < ny; j++)
 		{
-			img.at<uchar>(i, j) = 255 * (ave[i][j] - mini) / (maxi - mini);
-	         //pixel 赋值
+			if (ave[i][j]>1) {
+				stdi += (ave[i][j] - meani)*(ave[i][j] - meani);
+			}
+		}
+	}
+	
+	stdi /= Number_non_zero_pixel;
+	stdi = sqrt(stdi);
+	maxi = meani + times_std * stdi;  // 这个times_std要调参
+
+	for (int i = 0; i < nx; i++)
+	{
+		for (int j = 0; j < ny; j++)
+		{
+			if (ave[i][j]>maxi) ave[i][j] = maxi;
+			img.at<uchar>(i, j) = 255 * ave[i][j] / maxi;
+			//pixel 赋值
 		}
 	}
 }
@@ -214,6 +272,8 @@ void Imageprocess::pc2imgZ(const pcXYZIPtr &cloud, int whatcloud,  Mat &img){
 		}
 	}// 求取最大，最小格网平均高程
 
+
+
 	for (int i = 0; i < nx; i++)
 	{
 		for (int j = 0; j < ny; j++)
@@ -224,12 +284,11 @@ void Imageprocess::pc2imgZ(const pcXYZIPtr &cloud, int whatcloud,  Mat &img){
 	}
 }
 
-void Imageprocess::pc2imgD(const pcXYZIPtr &cloud, int whatcloud, Mat &img){
+void Imageprocess::pc2imgD(const pcXYZIPtr &cloud, int whatcloud, Mat &img, float expected_max_point_num_in_a_pixel){
 
 	img.create(nx, ny, CV_8UC1); //分配内存
 	Eigen::MatrixXi Matrixnum;
 	int maxnum, maxelement;
-	float expectedmaxnum;
 	Matrixnum.resize(nx, ny);
 	Matrixnum = Eigen::MatrixXi::Zero(nx, ny);
 	
@@ -257,11 +316,10 @@ void Imageprocess::pc2imgD(const pcXYZIPtr &cloud, int whatcloud, Mat &img){
 		break;
 	}
 
-	expectedmaxnum = res / 0.008;  // 0.01 is set empirically.  Point Spacing
 	//maxelement = Matrixnum.maxCoeff();
 	//if (maxelement < expectedmaxnum) maxnum = maxelement;
 	//else maxnum = expectedmaxnum;
-	maxnum = expectedmaxnum;
+	maxnum = expected_max_point_num_in_a_pixel;
 
 	//cout << "max point number"<<maxnum<<endl;
 	for (size_t i = 0; i < nx; i++)
@@ -277,10 +335,8 @@ void Imageprocess::pc2imgD(const pcXYZIPtr &cloud, int whatcloud, Mat &img){
 	}
 }
 
-void Imageprocess::img2pc(const Mat &img, const pcXYZIPtr &incloud, pcXYZIPtr & outcloud)
+void Imageprocess::img2pc_g(const Mat &img, const pcXYZIPtr &incloud, pcXYZIPtr & outcloud)
 {
-	/*timin = 0;
-	tjmin = 0;*/
 	
 	Mat grayImage,binImage;
 	cvtColor(img, grayImage, COLOR_BGR2GRAY);
@@ -298,13 +354,31 @@ void Imageprocess::img2pc(const Mat &img, const pcXYZIPtr &incloud, pcXYZIPtr & 
 		
 		}
 	}
-
 }
 
-void Imageprocess::img2pclabel(const Mat &img, const pcXYZIPtr &incloud, vector<pcXYZI> &outclouds , double dZ)
+void Imageprocess::img2pc_c(const Mat &img, const pcXYZIPtr &incloud, pcXYZIPtr & outcloud)
 {
-	/*timin = 0;
-	tjmin = 0;*/
+
+	Mat grayImage, binImage;
+	cvtColor(img, grayImage, COLOR_BGR2GRAY);
+	threshold(grayImage, binImage, 0, 1, CV_THRESH_BINARY);
+
+	for (size_t i = timin; i < timin + img.rows; i++)
+	{
+		for (size_t j = tjmin; j < tjmin + img.cols; j++)
+		{
+			if (binImage.at<uchar>(i - timin, j - tjmin) == 1)
+			{
+				for (auto k = CMatrixIndice[i][j].begin(); k != CMatrixIndice[i][j].end(); ++k)
+					outcloud->points.push_back(incloud->points[*k]);
+			}
+
+		}
+	}
+}
+
+void Imageprocess::img2pclabel_g(const Mat &img, const pcXYZIPtr &incloud, vector<pcXYZI> &outclouds , double dZ)
+{
 	int classNo = 0;
 	
 	outclouds.resize(totallabel-1);
@@ -363,6 +437,56 @@ void Imageprocess::img2pclabel(const Mat &img, const pcXYZIPtr &incloud, vector<
 	}
 	cout << "Cloud Number: " << classNo << endl;
 }
+
+void Imageprocess::img2pclabel_c(const Mat &img, const pcXYZIPtr &incloud, vector<pcXYZI> &outclouds, double dZ)
+{
+	int classNo = 0;
+
+	outclouds.resize(totallabel - 1);
+
+	for (int i = timin; i < timin + img.rows; i++)
+	{
+		const int* data_src = (int*)img.ptr<int>(i - timin);
+		for (int j = tjmin; j < tjmin + img.cols; j++)
+		{
+			int pixelValue = data_src[j - tjmin];
+
+			//在这儿就滤dZ比较好，一个个像素的滤，更安全
+			if (pixelValue > 1)
+			{
+				double max_z, min_z, disz;
+				max_z = -DBL_MAX;
+				min_z = DBL_MAX;
+
+
+				for (int k = 0; k < CMatrixIndice[i][j].size(); k++){
+
+					if (max_z < incloud->points[CMatrixIndice[i][j][k]].z)  max_z = incloud->points[CMatrixIndice[i][j][k]].z;
+					if (min_z > incloud->points[CMatrixIndice[i][j][k]].z)  min_z = incloud->points[CMatrixIndice[i][j][k]].z;
+
+				}
+				disz = max_z - min_z;
+				if (disz < dZ){
+					for (auto g = CMatrixIndice[i][j].begin(); g != CMatrixIndice[i][j].end(); ++g)
+						outclouds[pixelValue - 2].points.push_back(incloud->points[*g]);
+				}
+				else
+				{
+					if (outclouds[pixelValue - 2].size() == 0)
+						outclouds[pixelValue - 2].points.push_back(incloud->points[CMatrixIndice[i][j][0]]);//避免出现空点现象，之后再按数量滤除
+				}
+			}
+		}
+
+	}
+
+	for (int k = 0; k <= totallabel - 2; k++)
+	{
+		if (outclouds[k].size()>0) classNo++;
+	}
+	cout << "Cloud Number: " << classNo << endl;
+}
+
 
 Mat Imageprocess::Sobelboundary(Mat img0)
 {
@@ -448,7 +572,7 @@ Mat Imageprocess::maxEntropySegMentation(Mat inputImage)
 	return result;
 }
 
-Mat Imageprocess::ExtractRoadPixel(const Mat & _imgI, const Mat & _binZ ,const Mat & _binD)
+Mat Imageprocess::ExtractRoadPixelIZD( const Mat & _imgI, const Mat & _binZ ,const Mat & _binD)
 {
 	Mat result;
 	_imgI.convertTo(result, CV_8UC1);
@@ -481,6 +605,25 @@ Mat Imageprocess::ExtractRoadPixel(const Mat & _imgI, const Mat & _binZ ,const M
 	 Rect rect(mini, minj, maxi-mini+1, maxj-minj+1);
 	 Mat ROI = result(rect);
 	 return ROI;*/
+}
+Mat Imageprocess::ExtractRoadPixelIZ(const Mat & _imgI, const Mat & _binZ)
+{
+	Mat result;
+	_imgI.convertTo(result, CV_8UC1);
+	//int mini, minj, maxi, maxj;
+	//vector <int> arrayi, arrayj;
+	for (int i = 0; i < _imgI.rows; i++)
+	{
+		for (int j = 0; j < _imgI.cols; j++)
+		{
+			if (_binZ.at<uchar>(i, j) == 1)
+			{
+				result.at<uchar>(i, j) = 0;
+			}
+			else{ result.at<uchar>(i, j) = _imgI.at<uchar>(i, j); }
+		}
+	}
+	return result;
 }
 void Imageprocess::CcaByTwoPass(const Mat & _binImg, Mat & _labelImg)
 {
@@ -896,15 +1039,30 @@ void Imageprocess::LabelColor(const Mat & _labelImg, Mat & _colorLabelImg)
 	}
 
 }
-void Imageprocess::Truncate(const Mat & Img, Mat & TruncatedImg)
+void Imageprocess::Truncate(Mat & Img, Mat & TruncatedImg)
 {
 	int mini, minj, maxi, maxj, di, dj;
 	mini = INT_MAX; minj = INT_MAX;
 	maxi = 0; maxj = 0;
+
+
+
+	// 最外圈清零;
+	for (int i = 0; i < Img.rows; i++)
+	{
+		Img.at<uchar>(i, 0) = 0;
+		Img.at<uchar>(i, Img.cols - 1) = 0;
+	}
+	for (int j = 0; j < Img.cols; j++)
+	{
+		Img.at<uchar>(0, j) = 0;
+		Img.at<uchar>(Img.rows-1, j) = 0;
+	}
+
 	for (int i = 0; i < Img.rows; i++)
 	{
 		for (int j = 0; j < Img.cols; j++)
-		{
+		{		
 			if (Img.at<uchar>(i, j) != 0)
 			{
 				if (i<mini)mini = i;
@@ -914,12 +1072,16 @@ void Imageprocess::Truncate(const Mat & Img, Mat & TruncatedImg)
 			}
 		}
 	}
-   timin = mini-1;  
-   tjmin = minj-1;
+
+	
+	timin = mini - 1;
+	tjmin = minj - 1;
+	di = maxi - mini + 3;
+	dj = maxj - minj + 3;
+    Rect rect(tjmin, timin, dj, di);
+	TruncatedImg = Img(rect);
 
    
-	di = maxi - mini+3;
-	dj = maxj - minj+3;
 
 	/*TruncatedImg.create(di, dj, CV_8UC1);
 	for (int i = 0; i < di; i++)
@@ -931,8 +1093,8 @@ void Imageprocess::Truncate(const Mat & Img, Mat & TruncatedImg)
 	}*/
 	
 	//cout << "X: " << tjmin << "  Y: " << timin << "  dX: " << dj << "  dY: " << di<< endl;
-	Rect rect(tjmin, timin, dj, di);  
-	TruncatedImg = Img(rect);
+	
+	
 	//imshow("Truncated", 255*TruncatedImg);
 }
 
@@ -1013,8 +1175,9 @@ void Imageprocess::DetectCornerShiTomasi(const Mat & src, const Mat & colorlabel
 	}
 }
 
-void Imageprocess::saveimg(const Mat &ProjI, const Mat &ProjZ, const Mat &ProjD, const Mat &ProjImf, const Mat &GI, const Mat &GZ, const Mat &BZ, const Mat &BD, const Mat &GIR, const Mat &BI, const Mat &BIF, const Mat &Label/*const Mat &Corner*/)
+void Imageprocess::saveimg(const Mat &ProjI, const Mat &ProjZ, const Mat &ProjD, const Mat &ProjImf, const Mat &GI, const Mat &GZ, const Mat &BZ, const Mat &BD, const Mat &GIR, const Mat &BI, const Mat &BIF, const Mat &Label, const Mat &Corner)
 {
+
 imwrite("1_Intensity Projection Image.jpg", ProjI);
 imwrite("2_Elevation Projection Image.jpg", ProjZ);
 imwrite("3_Density Projection Image.jpg", ProjD);
@@ -1027,9 +1190,38 @@ imwrite("9_Road Intensity Gradient Image.jpg", GIR);
 imwrite("10_Road Intensity Binary Image.jpg", 255 * BI);
 imwrite("11_CCA Filter Road Intensity Binary Image.jpg", 255 * BIF);
 imwrite("12_RoadMarkings.jpg", Label);
-//imwrite("12_Marking Corners.jpg",Corner);
+imwrite("13_Marking Corners.jpg",Corner);
 
 cout << "Image Output Done." << endl;
 }
 
 
+void Imageprocess::saveimg(const Mat &ProjI, const Mat &ProjZ, const Mat &ProjD, const Mat &ProjImf, const Mat &GI, const Mat &GZ, const Mat &BZ, const Mat &BD, const Mat &GIR, const Mat &BI, const Mat &BIF, const Mat &Label)
+{
+	imwrite("1_Intensity Projection Image.jpg", ProjI);
+	imwrite("2_Elevation Projection Image.jpg", ProjZ);
+	imwrite("3_Density Projection Image.jpg", ProjD);
+	imwrite("4_Intensity Projection Image after Median Filter.jpg", ProjImf);
+	imwrite("5_Intensity Gradient Image.jpg", GI);
+	imwrite("6_Slope Image.jpg", GZ);
+	imwrite("7_Slope Binary Image.jpg", 255 * BZ);
+	imwrite("8_Density Binary Image.jpg", 255 * BD);
+	imwrite("9_Road Intensity Gradient Image.jpg", GIR);
+	imwrite("10_Road Intensity Binary Image.jpg", 255 * BI);
+	imwrite("11_CCA Filter Road Intensity Binary Image.jpg", 255 * BIF);
+	imwrite("12_RoadMarkings.jpg", Label);
+
+	cout << "Image Output Done." << endl;
+}
+
+void Imageprocess::saveimg(const Mat &ProjI, const Mat &ProjImf, const Mat &GI, const Mat &BI, const Mat &BIF, const Mat &Label)
+{
+	imwrite("1_Intensity Projection Image.jpg", ProjI);
+	imwrite("2_Intensity Projection Image after Median Filter.jpg", ProjImf);
+	imwrite("3_Intensity Gradient Image.jpg", GI);
+	imwrite("4_Road Intensity Binary Image.jpg", 255 * BI);
+	imwrite("5_CCA Filter Road Intensity Binary Image.jpg", 255 * BIF);
+	imwrite("6_RoadMarkings.jpg", Label);
+
+	cout << "Image Output Done." << endl;
+}
