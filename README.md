@@ -1,6 +1,8 @@
 # RoadMarkingExtraction
 A C++ Program for automatically extraction of road markings from MLS or ALS point cloud
 
+![alt text](demo/MLS_demo.gif)
+
 ### Under Development (V_1.0.1)
 
 ## About
