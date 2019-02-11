@@ -16,6 +16,10 @@ Author：Yue Pan et al. @ WHU
 
 To contact the author, please email to panyue@whu.edu.cn
 
+## Paper
+Related paper has been submitted to ISPRS Geospatial Week 2019 (ISPRS Archive)
+
+
 ## How to use
 1.Import a las file
 
