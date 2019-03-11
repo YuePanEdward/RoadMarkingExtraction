@@ -17,8 +17,7 @@ Author：Yue Pan et al. @ WHU
 To contact the author, please email to panyue@whu.edu.cn
 
 ## Paper
-Related paper has been submitted to ISPRS Geospatial Week 2019 (ISPRS Archive)
-
+Yue Pan, Bisheng Yang, Shengfu Li, Hong Yang, Zhen Dong, Xue Yang, Automatic Road Markings Extraction, Classification and Vectorization from Mobile Laser Scanning Data, ISPRS Geospatial Week 2019 (ISPRS Archives), (to appear)
 
 ## How to use
 1.Import a las file
