@@ -2,7 +2,7 @@
 #include "utility.h"
 
 // pcl io
-#include <pcl/io/pcd_io.h>  
+#include <pcl/io/pcd_io.h>
 #include <pcl/io/ply_io.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -40,7 +40,8 @@ namespace roadmarking
 	{
 		std::ifstream infile;
 		infile.open(paralistfile, ios::in);
-		if (!infile.is_open()) cout << "Failed to open the parameter file, use default parameters." << endl;
+		if (!infile.is_open())
+			cout << "Failed to open the parameter file, use default parameters." << endl;
 		infile >> paralist.road_type;
 		infile >> paralist.expected_point_num_per_m_square;
 		infile >> paralist.grid_resolution;
@@ -57,19 +58,24 @@ namespace roadmarking
 		infile >> paralist.visualization_on;
 	}
 
-	void DataIo::displayparameter(int datatype, int roadtype, int is_road_extracted) {
+	void DataIo::displayparameter(int datatype, int roadtype, int is_road_extracted)
+	{
 		cout << "-------------------------------------------------------------" << endl;
 		cout << "Parameter Specification:" << endl;
 
-		if (datatype == 1) cout << "MLS data\t";
-		else cout << "ALS data\t";
+		if (datatype == 1)
+			cout << "MLS data\t";
+		else
+			cout << "ALS data\t";
 
-		if (roadtype == 1)cout << "Highway\t";
-		else if (roadtype == 2) cout << "Urban road\t";
+		if (roadtype == 1)
+			cout << "Highway\t";
+		else if (roadtype == 2)
+			cout << "Urban road\t";
 
 		/*if (is_road_extracted == 1) cout << "Road unextracted\n";
 		else cout << "Road extracted\n";*/
-    
+
 		cout << "\nExpected point density:\t" << paralist.expected_point_num_per_m_square << " /m^2" << endl;
 		cout << "Grid resolution (m):\t" << paralist.grid_resolution << endl;
 		cout << "Point cloud intensity scale:\t" << paralist.intensity_scale << endl;
@@ -80,205 +86,9 @@ namespace roadmarking
 		cout << "Model matching tolerant min overlapping ratio (%):\t" << paralist.model_matching_overlapping_ratio_thre * 100.0 << " %" << endl;
 		cout << "Sideline vectorization distance (m):\t" << paralist.sideline_vector_distance << endl;
 		cout << "-------------------------------------------------------------" << endl;
-
 	}
 
-	bool DataIo::writeRoadmarkingShpWithOffset(const std::string &base_folder_name,
-		RoadMarkings & roadmarkings, int file_index,
-		float d_x, float d_y, float d_z)
-	{
-		// string outputFolder = base_folder_name + "\\Vectorized Road Markings (shp)"; // Windows
-		string outputFolder = base_folder_name + "/Vectorized Road Markings (shp)"; // Ubuntu
-
-		if (!boost::filesystem::exists(outputFolder))
-		{
-			boost::filesystem::create_directory(outputFolder);
-		}
-
-		std::string filename;
-		ostringstream oss;
-		oss << "\\Vectorized Road Markings_" << file_index << ".shp";
-		filename = outputFolder + oss.str();
-
-		//const char *pszDriverName = "ESRI Shapefile";
-		//GDALAllRegister();
-		//OGRRegisterAll();
-		//CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", "NO");
-
-		//OGRSFDriver* poDriver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName(pszDriverName);
-		////GDALDriver* poDriver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName(pszDriverName);
-
-		//if (poDriver == NULL) {
-		//	std::cout << "ESRI Shapefile : This driver is not available!" << std::endl;
-		//	//exit(1);
-		//}
-
-		//if ((_access(filename.c_str(), 0)) != -1) {
-		//	std::cout << "Exist this shp file." << std::endl;
-		//	remove(filename.c_str());
-		//}
-
-		//OGRDataSource *poDS;
-		////GDALDataset *poDS;
-
-		//poDS = poDriver->CreateDataSource(filename.c_str(), NULL);
-		////poDS = poDriver->Create(filename.c_str(), 0, 0, 0, GDT_Unknown, NULL);
-
-		//if (poDS == NULL) {
-		//	std::cout << "Failed in creating Dataset" << std::endl;
-		//	//exit(1);
-		//}
-		//else
-		//	std::cout << "Creating dataset done" << std::endl;
-
-		////// create layers:
-		//OGRLayer *poLayer;
-		//poLayer = poDS->CreateLayer("roadmarking", NULL, wkbMultiLineString25D, NULL);
-		//if (poLayer == NULL) {
-		//	std::cout << "Layer creation failed!" << std::endl;
-		//	exit(1);
-		//}
-		//else
-		//	std::cout << "Creating layer done" << std::endl;
-
-		//// create the attributes tables:
-		//OGRFieldDefn poFieldID("ID", OFTInteger);
-		//poFieldID.SetWidth(40);
-
-		//OGRFieldDefn poFieldType("Type", OFTInteger);
-		//poFieldID.SetWidth(40);
-
-		//if (poLayer->CreateField(&poFieldID) != OGRERR_NONE) {
-		//	std::cout << "ID field creation failed!" << std::endl;
-		//	exit(1);
-		//}
-		//if (poLayer->CreateField(&poFieldType) != OGRERR_NONE) {
-		//	std::cout << "Type field creation failed!" << std::endl;
-		//	exit(1);
-		//}
-
-		//// create lines
-		//int line_N = roadmarkings.size();
-
-		//for (int i = 0; i < line_N; ++i) {
-
-		//	if (roadmarkings[i].category > 0 && roadmarkings[i].polyline.size() > 1)
-		//	{
-		//		//cout << "Output vector " << i << " begin \n";
-		//		int pt_N = roadmarkings[i].polyline.size();
-
-		//		OGRFeature *poFeature;
-		//		poFeature = OGRFeature::CreateFeature(poLayer->GetLayerDefn());
-		//		poFeature->SetField("ID", i);
-		//		poFeature->SetField("Type", roadmarkings[i].category);
-		//		//OGRwkbGeometryType temp_line(wkbLineString25D);
-
-		//		OGRLineString line;
-		//		for (int j = 0; j < pt_N; ++j)
-		//		{
-		//			line.addPoint(roadmarkings[i].polyline[j].x + d_x,
-		//				roadmarkings[i].polyline[j].y + d_y,
-		//				roadmarkings[i].polyline[j].z + d_z);
-		//		}
-		//		if (roadmarkings[i].category > 1)
-		//			line.addPoint(roadmarkings[i].polyline[0].x + d_x,
-		//				roadmarkings[i].polyline[0].y + d_y,
-		//				roadmarkings[i].polyline[0].z + d_z); // close the polyline
-
-		//		poFeature->SetGeometry(&line);
-
-		//		if (poLayer->CreateFeature(poFeature) != OGRERR_NONE) {
-		//			std::cout << "Failed to create feature in shapefile." << std::endl;
-		//		}
-		//		OGRFeature::DestroyFeature(poFeature);
-
-		//		//cout << "Output vector " << i << " done \n";
-		//	}
-		//}
-
-		//OGRDataSource::DestroyDataSource(poDS);
-
-		cout << "Output vectorized roadmarking done \n";
-
-		return 1;
-	}
-
-
-
-	// bool DataIo::writeLasFile(const std::string &fileName, pcl::PointCloud<pcl::PointXYZI> &pointCloud)
-	// {
-	// 	Bounds bound;
-	// 	GetBoundaryOfPointCloud(pointCloud, bound);
-	
-	// 	ofstream ofs;
-	// 	ofs.open(fileName, std::ios::out | std::ios::binary);
-	// 	if (ofs.is_open())
-	// 	{
-	// 		liblas::Header header;
-	// 		header.SetDataFormatId(liblas::ePointFormat2);
-	// 		header.SetVersionMajor(1);
-	// 		header.SetVersionMinor(2);
-	// 		header.SetMin(bound.min_x, bound.min_y, bound.min_z);
-	// 		header.SetMax(bound.max_x, bound.max_y, bound.max_z);
-	// 		header.SetOffset((bound.min_x + bound.max_x) / 2.0, (bound.min_y + bound.max_y) / 2.0, (bound.min_z + bound.max_z) / 2.0);
-	
-	// 		header.SetScale(0.01, 0.01, 0.01);
-	// 		header.SetPointRecordsCount(pointCloud.points.size());
-	
-	// 		liblas::Writer writer(ofs, header);
-	// 		liblas::Point pt(&header);
-	
-	// 		for (int i = 0; i < pointCloud.points.size(); i++)
-	// 		{
-	// 			pt.SetCoordinates(pointCloud.points[i].x, pointCloud.points[i].y, pointCloud.points[i].z);
-	// 			pt.SetIntensity(pointCloud.points[i].intensity);
-	// 			writer.WritePoint(pt);
-	// 		}
-	// 		ofs.flush();
-	// 		ofs.close();
-	// 	}
-	
-	// 	return 1;
-	// }
-	
-	// bool DataIo::writeLasFile(const std::string &fileName, pcl::PointCloud<pcl::PointXYZI> &pointCloud, liblas::Color lasColor)
-	// {
-	// 	Bounds bound;
-	// 	GetBoundaryOfPointCloud(pointCloud, bound);
-	
-	// 	ofstream ofs;
-	// 	ofs.open(fileName, std::ios::out | std::ios::binary);
-	// 	if (ofs.is_open())
-	// 	{
-	// 		liblas::Header header;
-	// 		header.SetDataFormatId(liblas::ePointFormat2);
-	// 		header.SetVersionMajor(1);
-	// 		header.SetVersionMinor(2);
-	// 		header.SetMin(bound.min_x, bound.min_y, bound.min_z);
-	// 		header.SetMax(bound.max_x, bound.max_y, bound.max_z);
-	// 		header.SetOffset((bound.min_x + bound.max_x) / 2.0, (bound.min_y + bound.max_y) / 2.0, (bound.min_z + bound.max_z) / 2.0);
-	
-	// 		header.SetScale(0.01, 0.01, 0.01);
-	// 		header.SetPointRecordsCount(pointCloud.points.size());
-	
-	// 		liblas::Writer writer(ofs, header);
-	// 		liblas::Point pt(&header);
-	
-	// 		for (int i = 0; i < pointCloud.points.size(); i++)
-	// 		{
-	// 			pt.SetCoordinates(pointCloud.points[i].x, pointCloud.points[i].y, pointCloud.points[i].z);
-	// 			pt.SetIntensity(pointCloud.points[i].intensity);
-	// 			pt.SetColor(lasColor);
-	// 			writer.WritePoint(pt);
-	// 		}
-	// 		ofs.flush();
-	// 		ofs.close();
-	// 	}
-	
-	// 	return 1;
-	// }
-	
-	bool DataIo::writeLasFile(const std::string &fileName,  pcl::PointCloud<pcl::PointXYZI> &pointCloud, liblas::Color lasColor, double min_X, double min_Y)
+	bool DataIo::writeLasFile(const std::string &fileName, pcl::PointCloud<pcl::PointXYZI> &pointCloud, liblas::Color lasColor, double min_X, double min_Y)
 	{
 		Bounds bound;
 		GetBoundaryOfPointCloud(pointCloud, bound);
@@ -296,13 +106,13 @@ namespace roadmarking
 			header.SetOffset(double(bound.min_x + bound.max_x) / 2.0 + min_X, double(bound.min_y + bound.max_y) / 2.0 + min_Y, double(bound.min_z + bound.max_z) / 2.0);
 			header.SetScale(0.01, 0.01, 0.01);
 			header.SetPointRecordsCount(pointCloud.points.size());
-	
+
 			liblas::Writer writer(ofs, header);
 			liblas::Point pt(&header);
-	
+
 			for (int i = 0; i < pointCloud.points.size(); i++)
 			{
-				pt.SetCoordinates(pointCloud.points[i].x+min_X, pointCloud.points[i].y+min_Y, pointCloud.points[i].z);
+				pt.SetCoordinates(pointCloud.points[i].x + min_X, pointCloud.points[i].y + min_Y, pointCloud.points[i].z);
 				pt.SetIntensity(pointCloud.points[i].intensity);
 				pt.SetColor(lasColor);
 				writer.WritePoint(pt);
@@ -310,86 +120,36 @@ namespace roadmarking
 			ofs.flush();
 			ofs.close();
 		}
-	
+
 		return 1;
 	}
 
-	// bool DataIo::writeLasFile(const std::string &fileName, pcl::PointCloud<pcl::PointXYZRGB> &pointCloud)
-	// {
-	// 	Bounds bound;
-	// 	GetBoundaryOfPointCloud(pointCloud, bound);
-	
-	// 	ofstream ofs;
-	// 	ofs.open(fileName, std::ios::out | std::ios::binary);
-	// 	if (ofs.is_open())
-	// 	{
-	// 		liblas::Header header;
-	// 		header.SetDataFormatId(liblas::ePointFormat2);
-	// 		header.SetVersionMajor(1);
-	// 		header.SetVersionMinor(2);
-	// 		header.SetMin(bound.min_x, bound.min_y, bound.min_z);
-	// 		header.SetMax(bound.max_x, bound.max_y, bound.max_z);
-	// 		header.SetOffset((bound.min_x + bound.max_x) / 2.0, (bound.min_y + bound.max_y) / 2.0, (bound.min_z + bound.max_z) / 2.0);
-	
-	// 		header.SetScale(0.0000001, 0.0000001, 0.0000001);
-	// 		header.SetPointRecordsCount(pointCloud.points.size());
-	
-	// 		liblas::Writer writer(ofs, header);
-	// 		liblas::Point pt(&header);
-	
-	// 		for (int i = 0; i < pointCloud.points.size(); i++)
-	// 		{
-	// 			if (bound.max_x < 10.0&&bound.max_y < 10.0&&bound.max_z < 10.0)
-	// 			{
-	// 				pt.SetCoordinates((double)(pointCloud.points[i].x*1000.0),
-	// 					(double)(pointCloud.points[i].y*1000.0),
-	// 					(double)(pointCloud.points[i].z*1000.0));
-	// 			}
-	// 			else
-	// 			{
-	// 				pt.SetCoordinates((double)pointCloud.points[i].x, (double)pointCloud.points[i].y,
-	// 					(double)pointCloud.points[i].z);
-	// 			}
-	
-	// 			uint8_t red = pointCloud.points[i].r;
-	// 			uint8_t green = pointCloud.points[i].g;
-	// 			uint8_t blue = pointCloud.points[i].b;
-	// 			pt.SetColor(liblas::Color(red, green, blue));
-	// 			writer.WritePoint(pt);
-	// 		}
-	// 		ofs.flush();
-	// 		ofs.close();
-	// 	}
-	
-	// 	return 1;
-	// }
-	
-	bool DataIo::writeLasAll(int file_index, const string &outputFolder,  vector<pcl::PointCloud<pcl::PointXYZI>> &pointClouds,
-		const RoadMarkings &roadmarkings, double minX, double minY)
+	bool DataIo::writeLasAll(int file_index, const string &outputFolder, vector<pcl::PointCloud<pcl::PointXYZI>> &pointClouds,
+							 const RoadMarkings &roadmarkings, double minX, double minY)
 	{
-	
+
 		if (!boost::filesystem::exists(outputFolder))
 		{
 			boost::filesystem::create_directory(outputFolder);
 		}
-	
+
 		for (size_t i = 0; i < pointClouds.size(); i++)
 		{
-			string  outputFileName;
+			string outputFileName;
 			ostringstream oss_id;
 			//oss_id << setw(4) << setfill('0') << file_index <<  "_" << setw(4) << setfill('0') << i << ".las";
 
-            oss_id << setw(4) << setfill('0') << i << "_" << setw(2) << setfill('0') << roadmarkings[i].category << ".las";
+			oss_id << setw(4) << setfill('0') << i << "_" << setw(2) << setfill('0') << roadmarkings[i].category << ".las";
 
 			// outputFileName = outputFolder + "\\" + oss.str(); // Windows
 			outputFileName = outputFolder + "/" + oss_id.str(); // Ubuntu
-			
+
 			liblas::Color lasColor;
-			
+
 			switch (roadmarkings[i].category)
 			{
 			case 1:
-				lasColor.SetRed(0); 
+				lasColor.SetRed(0);
 				lasColor.SetGreen(255);
 				lasColor.SetBlue(0);
 				break;
@@ -429,46 +189,45 @@ namespace roadmarking
 				lasColor.SetBlue(255);
 				break;
 			}
-	
-			writeLasFile(outputFileName, pointClouds[i],lasColor,minX,minY);
+
+			writeLasFile(outputFileName, pointClouds[i], lasColor, minX, minY);
 		}
 		cout << "Output Classified Road Markings Point Cloud Done" << endl;
 		return true;
 	}
 
-	bool DataIo::writeLasAll(const std::string &folderName, int file_index, const string &fileName,  vector<pcl::PointCloud<pcl::PointXYZI>> &pointClouds,
-		const RoadMarkings &roadmarkings, double minX, double minY)
+	bool DataIo::writeLasAll(const std::string &folderName, int file_index, const string &fileName, vector<pcl::PointCloud<pcl::PointXYZI>> &pointClouds,
+							 const RoadMarkings &roadmarkings, double minX, double minY)
 	{
-	
+
 		string outputFolder;
-	
+
 		ostringstream oss;
 		oss << "Classified Road Markings_" << file_index;
-		
+
 		// outputFolder = folderName + "Classified Road Markings (las)\\" + oss.str(); // Windows
 		// outputFolder = folderName + "Classified Road Markings (las)/" + oss.str(); // Ubuntu
 		outputFolder = folderName + "Classified Road Markings (las)/"; // Ubuntu
-	
+
 		if (!boost::filesystem::exists(outputFolder))
 		{
 			boost::filesystem::create_directory(outputFolder);
 		}
-	
-	
+
 		for (size_t i = 0; i < pointClouds.size(); i++)
 		{
-			string  outputFileName;
+			string outputFileName;
 			ostringstream oss;
 			oss << i << "_" << fileName;
 			// outputFileName = outputFolder + "\\" + oss.str() + ".las"; // Windows
 			outputFileName = outputFolder + "/" + oss.str() + ".las"; // Windows
-			
+
 			liblas::Color lasColor;
-			
+
 			switch (roadmarkings[i].category)
 			{
 			case 1:
-				lasColor.SetRed(0); 
+				lasColor.SetRed(0);
 				lasColor.SetGreen(255);
 				lasColor.SetBlue(0);
 				break;
@@ -508,86 +267,22 @@ namespace roadmarking
 				lasColor.SetBlue(255);
 				break;
 			}
-	
-			writeLasFile(outputFileName, pointClouds[i],lasColor,minX,minY);
+
+			writeLasFile(outputFileName, pointClouds[i], lasColor, minX, minY);
 		}
 		cout << "Output Classified Road Markings Point Cloud Done" << endl;
 		return true;
 	}
-	
-	// bool DataIo::batchWriteLasFile(const std::string &folderName, const std::vector<std::string> &fileNames,
-	// 	std::vector<pcl::PointCloud<pcl::PointXYZI>> &pointClouds)
-	// {
-	// 	path folderPath(folderName);
-	
-	// 	//�����ļ���;
-	// 	if (!exists(folderName))
-	// 	{
-	// 		create_directory(folderName);
-	// 	}
-	
-	// 	if (fileNames.empty())
-	// 	{
-	// 		return 0;
-	// 	}
-	// 	else
-	// 	{
-	// 		for (size_t i = 0; i < fileNames.size(); ++i)
-	// 		{
-	// 			path dir(fileNames[i]);
-	// 			string fileName;
-	// 			//��ȡ������·���ͺ�׺���ļ���;
-	// 			fileName = dir.stem().string();
-	// 			fileName = folderName + "\\" + fileName + ".las";
-	// 			writeLasFile(fileName, pointClouds[i]);
-	// 		}
-	// 	}
-	
-	// 	return 1;
-	// }
-	//
-	//bool DataIo::batchWriteLasFile(const std::string &folderName, const std::vector<std::string> &fileNames,
-	//	std::vector<pcl::PointCloud<pcl::PointXYZRGB>> &pointClouds)
-	//{
-	//	path folderPath(folderName);
-	//
-	//	//�����ļ���;
-	//	if (!exists(folderName))
-	//	{
-	//		create_directory(folderName);
-	//	}
-	//
-	//	if (fileNames.empty())
-	//	{
-	//		return 0;
-	//	}
-	//	else
-	//	{
-	//		for (size_t i = 0; i < fileNames.size(); ++i)
-	//		{
-	//			path dir(fileNames[i]);
-	//			string fileName;
-	//			//��ȡ������·���ͺ�׺���ļ���;
-	//			fileName = dir.stem().string();
-	//			fileName = folderName + "\\" + fileName + ".las";
-	//			writeLasFile(fileName, pointClouds[i]);
-	//		}
-	//	}
-	//
-	//	return 1;
-	//}
 
-	bool DataIo::batchReadFileNamesInFolders(const std::string &folderName, const std::string & extension,
-		std::vector<std::string> &fileNames)
+	bool DataIo::batchReadFileNamesInFolders(const std::string &folderName, const std::string &extension,
+											 std::vector<std::string> &fileNames)
 	{
-		//����boost�����ļ����ڵ��ļ�;
 		if (!exists(folderName))
 		{
 			return 0;
 		}
 		else
 		{
-			//�������ļ����µ�����Ϊextension���ļ�,�����浽fileNames��;
 			directory_iterator end_iter;
 			for (directory_iterator iter(folderName); iter != end_iter; ++iter)
 			{
@@ -611,11 +306,11 @@ namespace roadmarking
 		return 1;
 	}
 
-	bool DataIo::batchReadFileNamesInFoldersAndSubFolders(const std::string &folderName,//�ļ���·��;
-		const std::string & extension,//Ŀ���ļ�����չ��;
-		std::vector<std::string> &fileNames)//����Ŀ���ļ���·��+�ļ���+��չ��;
+	bool DataIo::batchReadFileNamesInFoldersAndSubFolders(const std::string &folderName,	  
+														  const std::string &extension,		   
+														  std::vector<std::string> &fileNames) 
 	{
-		boost::filesystem::path  fullpath(folderName);
+		boost::filesystem::path fullpath(folderName);
 
 		if (!exists(fullpath))
 		{
@@ -642,10 +337,9 @@ namespace roadmarking
 							fileNames.push_back(sFileName);
 						}
 					}
-
 				}
 			}
-			catch (const std::exception & ex)
+			catch (const std::exception &ex)
 			{
 				std::cerr << ex.what() << std::endl;
 				continue;
@@ -657,7 +351,7 @@ namespace roadmarking
 	bool DataIo::readPcdFile(const std::string &fileName, const pcXYZIPtr &pointCloud)
 	{
 		pcl::console::setVerbosityLevel(pcl::console::L_ALWAYS); //Ban pcl warnings
-		
+
 		if (pcl::io::loadPCDFile(fileName, *pointCloud) == -1) //* load the file
 		{
 			PCL_ERROR("Couldn't read file\n");
@@ -669,7 +363,7 @@ namespace roadmarking
 
 	bool DataIo::writePcdFile(const std::string &fileName, const pcXYZIPtr &pointCloud)
 	{
-		pointCloud->width = pointCloud->points.size ();
+		pointCloud->width = pointCloud->points.size();
 		pointCloud->height = 1;
 		if (pcl::io::savePCDFileBinary<pcl::PointXYZI>(fileName, *pointCloud) == -1) //* load the file
 		{
@@ -681,7 +375,7 @@ namespace roadmarking
 
 	bool DataIo::writePcdFile(const string &fileName, const pcXYZRGBPtr &pointCloud)
 	{
-		pointCloud->width = pointCloud->points.size ();
+		pointCloud->width = pointCloud->points.size();
 		pointCloud->height = 1;
 		if (pcl::io::savePCDFileBinary<pcl::PointXYZRGB>(fileName, *pointCloud) == -1) //* load the file
 		{
@@ -695,8 +389,6 @@ namespace roadmarking
 	{
 		vector<pcXYZRGB> pointCloudsRGB;
 		pointCloudsRGB.resize(pointClouds.size());
-
-		//�����ɫ;
 		for (size_t i = 0; i < pointClouds.size(); i++)
 		{
 			int R, G, B;
@@ -754,7 +446,7 @@ namespace roadmarking
 
 		for (size_t i = 0; i < pointClouds.size(); i++)
 		{
-			string  outputFileName;
+			string outputFileName;
 			ostringstream oss;
 			oss << i << "_" << fileName;
 			// outputFileName = foldername + "\\" + oss.str(); // Windows
@@ -764,25 +456,19 @@ namespace roadmarking
 		}
 		string NGCloud_Filename, GCloud_Filename;
 
-		// NGCloud_Filename = foldername + "\\Non_Ground_Cloud.pcd"; // Windows
-		// GCloud_Filename = foldername + "\\Ground_Cloud.pcd"; // Windows
 		NGCloud_Filename = foldername + "/Non_Ground_Cloud.pcd"; // Windows
-		GCloud_Filename = foldername + "/Ground_Cloud.pcd"; // Windows
+		GCloud_Filename = foldername + "/Ground_Cloud.pcd";		 // Windows
 
 		writePcdFile(NGCloud_Filename, NGCloud);
 		writePcdFile(GCloud_Filename, GCloud);
-
-		//cout << "Output Done" << endl;
 		return true;
 	}
-
 
 	bool DataIo::writePcdAll(const string &foldername, const string &fileName, const vector<pcXYZI> &pointClouds, const RoadMarkings &roadmarkings, double minX, double minY)
 	{
 		vector<pcXYZRGB> pointCloudsRGB;
 		pointCloudsRGB.resize(pointClouds.size());
 
-		//�����ɫ;
 		for (size_t i = 0; i < pointClouds.size(); i++)
 		{
 			int R, G, B;
@@ -840,7 +526,7 @@ namespace roadmarking
 
 		for (size_t i = 0; i < pointClouds.size(); i++)
 		{
-			string  outputFileName;
+			string outputFileName;
 			ostringstream oss;
 			oss << i << "_" << fileName;
 			outputFileName = foldername + "\\" + oss.str();
@@ -857,7 +543,6 @@ namespace roadmarking
 		vector<pcXYZRGB> pointCloudsRGB;
 		pointCloudsRGB.resize(pointClouds.size());
 
-		//�����ɫ;
 		for (size_t i = 0; i < pointClouds.size(); i++)
 		{
 			int R, G, B;
@@ -915,7 +600,7 @@ namespace roadmarking
 
 		for (size_t i = 0; i < pointClouds.size(); i++)
 		{
-			string  outputFileName;
+			string outputFileName;
 			ostringstream oss;
 			oss << i << "_" << fileName;
 			outputFileName = foldername + "\\" + oss.str();
@@ -923,11 +608,11 @@ namespace roadmarking
 			writePcdFile(outputFileName, pointCloudsRGB[i].makeShared());
 		}
 
-		//cout << "Output Done" << endl;
 		return true;
 	}
 
-	bool DataIo::writePcdAll(const string &folderName, const string &fileName, const vector<pcXYZI> &pointClouds) {
+	bool DataIo::writePcdAll(const string &folderName, const string &fileName, const vector<pcXYZI> &pointClouds)
+	{
 
 		if (!boost::filesystem::exists(folderName))
 		{
@@ -936,12 +621,13 @@ namespace roadmarking
 
 		for (int i = 0; i < pointClouds.size(); i++)
 		{
-			string  outputFileName;
+			string outputFileName;
 			ostringstream oss;
 			oss << setw(4) << setfill('0') << i << "_" << fileName;
 			// outputFileName = folderName + "\\" + oss.str(); // Windows
 			outputFileName = folderName + "/" + oss.str(); // Ubuntu
-			if (pointClouds[i].makeShared()->points.size() < 100) {
+			if (pointClouds[i].makeShared()->points.size() < 100)
+			{
 				//cout << "Warning: the" << i << "th point cloud contain point less than the threshold. Do not save it." << endl;
 				continue;
 			}
@@ -950,80 +636,73 @@ namespace roadmarking
 
 		//cout << "Output Done" << endl;
 		return true;
-
 	}
 
-	// ============================ LIBLAS =============================
 	void DataIo::displayroad(const pcXYZIPtr &ngcloud, const pcXYZIPtr &gcloud)
-	{	
+	{
 		boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer(new pcl::visualization::PCLVisualizer("3D Viewer"));
 		viewer->setBackgroundColor(255, 255, 255);
 		char t[256];
 		string s;
 		int n = 0;
-		float maxi,maxvi,mini,max_z,min_z;
+		float maxi, maxvi, mini, max_z, min_z;
 		maxi = -FLT_MAX;
 		mini = FLT_MAX;
 		max_z = -FLT_MAX;
 		min_z = FLT_MAX;
-	
+
 		int startcolor[3];
 		int endcolor[3];
 		int rr, gg, bb;
 		float kk;
-	
-		//cout << "Input the color scale that you want to render the point cloud." << endl;
-		//cout << "Start Color R,G,B:" << endl;
-	
-		//cin >> startcolor[0] >> startcolor[1] >> startcolor[2];
-	
-		//cout << "End Color R,G,B:" << endl;
-		//cin >> endcolor[0] >> endcolor[1] >> endcolor[2];
-		
-	
-		startcolor[0] = 255; startcolor[1] = 0; startcolor[2] = 0;
-		endcolor[0] = 0; endcolor[1] = 255; endcolor[2] = 0;
-	
+
+		startcolor[0] = 255;
+		startcolor[1] = 0;
+		startcolor[2] = 0;
+		endcolor[0] = 0;
+		endcolor[1] = 255;
+		endcolor[2] = 0;
+
 		rr = startcolor[0] - endcolor[0];
 		gg = startcolor[1] - endcolor[1];
 		bb = startcolor[2] - endcolor[2];
-	
+
 		//maxvi = 10000;
 		pcXYZRGBPtr GC(new pcXYZRGB());
 		pcXYZRGBPtr NGC(new pcXYZRGB());
-	
+
 		for (size_t i = 0; i < ngcloud->points.size(); ++i)
 		{
-			if (ngcloud->points[i].z > max_z) max_z = ngcloud->points[i].z;
-			if (ngcloud->points[i].z < min_z) min_z = ngcloud->points[i].z;
+			if (ngcloud->points[i].z > max_z)
+				max_z = ngcloud->points[i].z;
+			if (ngcloud->points[i].z < min_z)
+				min_z = ngcloud->points[i].z;
 		}
-	
-	
+
 		for (size_t i = 0; i < gcloud->points.size(); ++i)
 		{
-			if (gcloud->points[i].intensity > maxi) maxi = gcloud->points[i].intensity;
-			if (gcloud->points[i].intensity < mini) mini = gcloud->points[i].intensity;
+			if (gcloud->points[i].intensity > maxi)
+				maxi = gcloud->points[i].intensity;
+			if (gcloud->points[i].intensity < mini)
+				mini = gcloud->points[i].intensity;
 		}
-	
-	
-		//cout << "max intensity: " << maxi << "\tmin intensity: " << mini<<endl;
-	
+
 		for (size_t i = 0; i < ngcloud->points.size(); ++i)
 		{
 			pcl::PointXYZRGB pt;
 			pt.x = ngcloud->points[i].x;
 			pt.y = ngcloud->points[i].y;
 			pt.z = ngcloud->points[i].z;
-			
+
 			kk = (ngcloud->points[i].z - min_z) / (max_z - min_z);
 			pt.r = endcolor[0] + rr * kk;
 			pt.g = endcolor[1] + gg * kk;
 			pt.b = endcolor[2] + bb * kk;
 			NGC->points.push_back(pt);
 		}
-		
+
 		viewer->addPointCloud(NGC, "Non-ground");
-	
+
 		// Ground points are rendered in intensity
 		for (size_t i = 0; i < gcloud->points.size(); ++i)
 		{
@@ -1031,29 +710,15 @@ namespace roadmarking
 			pt.x = gcloud->points[i].x;
 			pt.y = gcloud->points[i].y;
 			pt.z = gcloud->points[i].z;
-			/*if (gcloud->points[i].intensity<maxvi)
-			{
-				pt.r = 255;
-				pt.g = 255;
-				pt.b = 255;
-			}
-			else{
-				pt.r = 0;
-				pt.g = 0;
-				pt.b = 0;
-			}*/
-			//pt.r = (int)((min(gcloud->points[i].intensity, maxvi) - mini) / (maxvi - mini) * 255);
-			//pt.g = (int)((min(gcloud->points[i].intensity, maxvi) - mini) / (maxvi - mini) * 255);
-			//pt.b = (int)((min(gcloud->points[i].intensity, maxvi) - mini) / (maxvi - mini) * 255);
-	
+
 			pt.r = 255 * (gcloud->points[i].intensity - mini) / (maxi - mini);
 			pt.g = 255 * (gcloud->points[i].intensity - mini) / (maxi - mini);
 			pt.b = 255 * (gcloud->points[i].intensity - mini) / (maxi - mini);
 			GC->points.push_back(pt);
 		}
-	
+
 		viewer->addPointCloud(GC, "Ground");
-	
+
 		cout << "Click X(close) to continue..." << endl;
 		while (!viewer->wasStopped())
 		{
@@ -1061,47 +726,43 @@ namespace roadmarking
 			boost::this_thread::sleep(boost::posix_time::microseconds(100000));
 		}
 	}
-	
-	void DataIo::displaymark(const vector<pcXYZI> &clouds){
-		
+
+	void DataIo::displaymark(const vector<pcXYZI> &clouds)
+	{
+
 		boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer(new pcl::visualization::PCLVisualizer("3D Viewer"));
 		viewer->setBackgroundColor(255, 255, 255);
 		char t[256];
 		string s;
 		int n = 0;
-	
-		vector<pcXYZRGB>  colorclouds;
+
+		vector<pcXYZRGB> colorclouds;
 		colorclouds.resize(clouds.size());
-		for (int i = 0; i <clouds.size(); ++i)
+		for (int i = 0; i < clouds.size(); ++i)
 		{
 			int r = 255 * (rand() / (1.0 + RAND_MAX));
 			int g = 255 * (rand() / (1.0 + RAND_MAX));
 			int b = 255 * (rand() / (1.0 + RAND_MAX));
-	
+
 			for (size_t j = 0; j < clouds[i].points.size(); ++j)
 			{
 				pcl::PointXYZRGB pt;
 				pt.x = clouds[i].points[j].x;
 				pt.y = clouds[i].points[j].y;
-				pt.z = clouds[i].points[j].z; 
-				//�����ɫ
-				
-			    pt.r = r;
+				pt.z = clouds[i].points[j].z;
+				pt.r = r;
 				pt.g = g;
 				pt.b = b;
-				
 				colorclouds[i].points.push_back(pt);
-	
 			}
-			string  colorcloud;
+			string colorcloud;
 			ostringstream oss;
-			oss << i <<  "_colorcloud";
+			oss << i << "_colorcloud";
 			colorcloud = oss.str();
-	
-			viewer->addPointCloud(colorclouds[i].makeShared(),colorcloud);
-	
-		}	
-	
+
+			viewer->addPointCloud(colorclouds[i].makeShared(), colorcloud);
+		}
+
 		cout << "Click X(close) to continue..." << endl;
 		while (!viewer->wasStopped())
 		{
@@ -1109,7 +770,7 @@ namespace roadmarking
 			boost::this_thread::sleep(boost::posix_time::microseconds(100000));
 		}
 	}
-	
+
 	void DataIo::displaymarkwithng(const vector<pcXYZI> &clouds, const pcXYZIPtr &ngcloud)
 	{
 		boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer(new pcl::visualization::PCLVisualizer("3D Viewer"));
@@ -1117,79 +778,81 @@ namespace roadmarking
 		char t[256];
 		string s;
 		int n = 0;
-	
-		vector<pcXYZRGB>  colorclouds;
+
+		vector<pcXYZRGB> colorclouds;
 		colorclouds.resize(clouds.size());
 		for (int i = 0; i < clouds.size(); ++i)
 		{
 			int r = 255 * (rand() / (1.0 + RAND_MAX));
 			int g = 255 * (rand() / (1.0 + RAND_MAX));
 			int b = 255 * (rand() / (1.0 + RAND_MAX));
-	
+
 			for (size_t j = 0; j < clouds[i].points.size(); ++j)
 			{
 				pcl::PointXYZRGB pt;
 				pt.x = clouds[i].points[j].x;
 				pt.y = clouds[i].points[j].y;
 				pt.z = clouds[i].points[j].z;
-				//�����ɫ
-	
 				pt.r = r;
 				pt.g = g;
 				pt.b = b;
-	
+
 				colorclouds[i].points.push_back(pt);
-	
 			}
-			string  colorcloud;
+			string colorcloud;
 			ostringstream oss;
 			oss << i << "_colorcloud";
 			colorcloud = oss.str();
-	
+
 			viewer->addPointCloud(colorclouds[i].makeShared(), colorcloud);
-	
 		}
-	
-		float  max_z, min_z;
+
+		float max_z, min_z;
 		max_z = -FLT_MAX;
 		min_z = FLT_MAX;
-	
+
 		int startcolor[3];
 		int endcolor[3];
 		int rr, gg, bb;
 		float kk;
-	
-		startcolor[0] = 255; startcolor[1] = 0; startcolor[2] = 0;
-		endcolor[0] = 0; endcolor[1] = 255; endcolor[2] = 0;
-	
+
+		startcolor[0] = 255;
+		startcolor[1] = 0;
+		startcolor[2] = 0;
+		endcolor[0] = 0;
+		endcolor[1] = 255;
+		endcolor[2] = 0;
+
 		rr = startcolor[0] - endcolor[0];
 		gg = startcolor[1] - endcolor[1];
 		bb = startcolor[2] - endcolor[2];
-	
+
 		pcXYZRGBPtr NGC(new pcXYZRGB());
-	
+
 		for (size_t i = 0; i < ngcloud->points.size(); ++i)
 		{
-			if (ngcloud->points[i].z > max_z) max_z = ngcloud->points[i].z;
-			if (ngcloud->points[i].z < min_z) min_z = ngcloud->points[i].z;
+			if (ngcloud->points[i].z > max_z)
+				max_z = ngcloud->points[i].z;
+			if (ngcloud->points[i].z < min_z)
+				min_z = ngcloud->points[i].z;
 		}
-	
+
 		for (size_t i = 0; i < ngcloud->points.size(); ++i)
 		{
 			pcl::PointXYZRGB pt;
 			pt.x = ngcloud->points[i].x;
 			pt.y = ngcloud->points[i].y;
 			pt.z = ngcloud->points[i].z;
-	
+
 			kk = (ngcloud->points[i].z - min_z) / (max_z - min_z);
 			pt.r = endcolor[0] + rr * kk;
 			pt.g = endcolor[1] + gg * kk;
 			pt.b = endcolor[2] + bb * kk;
 			NGC->points.push_back(pt);
 		}
-	
+
 		viewer->addPointCloud(NGC, "Non-ground");
-	
+
 		cout << "Click X(close) to continue..." << endl;
 		while (!viewer->wasStopped())
 		{
@@ -1197,7 +860,7 @@ namespace roadmarking
 			boost::this_thread::sleep(boost::posix_time::microseconds(100000));
 		}
 	}
-	
+
 	void DataIo::displaymarkbycategory(const vector<pcXYZI> &clouds, const RoadMarkings &roadmarkings)
 	{
 		boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer(new pcl::visualization::PCLVisualizer("3D Viewer"));
@@ -1205,87 +868,78 @@ namespace roadmarking
 		char t[256];
 		string s;
 		int n = 0;
-	
-		vector<pcXYZRGB>  colorclouds;
+
+		vector<pcXYZRGB> colorclouds;
 		colorclouds.resize(clouds.size());
 		for (int i = 0; i < clouds.size(); ++i)
 		{
 			int r, g, b;
 			switch (roadmarkings[i].category)
 			{
-			case 1:  //������    //��    //ǳ�� 135 206 250
+			case 1: 
 				r = 0;
 				g = 255;
 				b = 0;
 				break;
-			
-			case 2:  //������   //��    //õ��� 255 48 48
+			case 2: 
 				r = 255;
 				g = 0;
 				b = 0;
 				break;
-	
-			case 3:  //ǰ���ͷ  //��     //��ɫ 238 130 238
+			case 3:
 				r = 0;
 				g = 0;
 				b = 255;
 				break;
-			
-			case 4:  //ǰ�����ͷ  //��   //ǳ�� 193 255 193
+			case 4:
 				r = 0;
 				g = 255;
 				b = 255;
 				break;
-	
-			case 5:  //�����ͷ   //��   //�ۺ� 255 193 193
+			case 5: 
 				r = 255;
 				g = 0;
 				b = 255;
 				break;
-	
-			case 6: //��ͷ��ͷ  //��
+			case 6: 
 				r = 255;
 				g = 255;
 				b = 0;
 				break;
-	
-			case 8: //���α�־ //��
+			case 8:
 				r = 255;
 				g = 170;
 				b = 0;
 				break;
-	
 			default:
 				r = 255;
 				g = 250;
 				b = 250;
 				break;
-	
 			}
-			   
+
 			for (size_t j = 0; j < clouds[i].points.size(); ++j)
 			{
 				pcl::PointXYZRGB pt;
 				pt.x = clouds[i].points[j].x;
 				pt.y = clouds[i].points[j].y;
 				pt.z = clouds[i].points[j].z;
-	
+
 				pt.r = r;
 				pt.g = g;
 				pt.b = b;
-	
+
 				colorclouds[i].points.push_back(pt);
-	
 			}
-			
-			string  colorcloud;
+
+			string colorcloud;
 			ostringstream oss;
 			oss << i << "_colorcloud";
 			colorcloud = oss.str();
-	
+
 			viewer->addPointCloud(colorclouds[i].makeShared(), colorcloud);
 		}
-	
+
 		cout << "Click X(close) to continue..." << endl;
 		while (!viewer->wasStopped())
 		{
@@ -1300,13 +954,13 @@ namespace roadmarking
 		char t[256];
 		string s;
 		int n = 0;
-	
+
 		for (int i = 0; i < roadmarkings.size(); i++)
 		{
 			switch (roadmarkings[i].category)
 			{
-			case 1:  //������
-				for (int j = 0; j < roadmarkings[i].polyline.size()-1; j++)
+			case 1:
+				for (int j = 0; j < roadmarkings[i].polyline.size() - 1; j++)
 				{
 					pcl::PointXYZ pt1;
 					pt1.x = roadmarkings[i].polyline[j].x;
@@ -1316,27 +970,26 @@ namespace roadmarking
 					s = t;
 					viewer->addSphere(pt1, 0.1, 0.0, 1.0, 0.0, s);
 					n++;
-	
+
 					pcl::PointXYZ pt2;
-			        pt2.x = roadmarkings[i].polyline[j + 1].x;
-				    pt2.y = roadmarkings[i].polyline[j + 1].y;
-				    pt2.z = roadmarkings[i].polyline[j + 1].z;
-				
+					pt2.x = roadmarkings[i].polyline[j + 1].x;
+					pt2.y = roadmarkings[i].polyline[j + 1].y;
+					pt2.z = roadmarkings[i].polyline[j + 1].z;
+
 					sprintf(t, "%d", n);
 					s = t;
 					viewer->addSphere(pt2, 0.1, 0.0, 1.0, 0.0, s);
 					n++;
-	
+
 					sprintf(t, "%d", n);
 					s = t;
 					viewer->addLine(pt1, pt2, 0.0, 1.0, 0.0, s);
 					viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 1, s);
 					n++;
 				}
-	
 				break;
 			case 2:
-				for (int j = 0; j < 4; j++) //�������
+				for (int j = 0; j < 4; j++) 
 				{
 					pcl::PointXYZ pt1;
 					pt1.x = roadmarkings[i].polyline[j].x;
@@ -1346,15 +999,16 @@ namespace roadmarking
 					s = t;
 					viewer->addSphere(pt1, 0.1, 1.0, 0.0, 0.0, s);
 					n++;
-	
-	
+
 					pcl::PointXYZ pt2;
-					if (j == 3){
+					if (j == 3)
+					{
 						pt2.x = roadmarkings[i].polyline[0].x;
 						pt2.y = roadmarkings[i].polyline[0].y;
 						pt2.z = roadmarkings[i].polyline[0].z;
 					}
-					else{
+					else
+					{
 						pt2.x = roadmarkings[i].polyline[j + 1].x;
 						pt2.y = roadmarkings[i].polyline[j + 1].y;
 						pt2.z = roadmarkings[i].polyline[j + 1].z;
@@ -1363,18 +1017,17 @@ namespace roadmarking
 					s = t;
 					viewer->addSphere(pt2, 0.1, 1.0, 0.0, 0.0, s);
 					n++;
-	
+
 					sprintf(t, "%d", n);
 					s = t;
 					viewer->addLine(pt1, pt2, 1.0, 0.0, 0.0, s);
 					viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 1, s);
 					n++;
 				}
-	
 				break;
-	
+
 			case 3:
-				for (int j = 0; j < 7; j++) //ֱ��ͷ
+				for (int j = 0; j < 7; j++) 
 				{
 					pcl::PointXYZ pt1;
 					pt1.x = roadmarkings[i].polyline[j].x;
@@ -1384,15 +1037,16 @@ namespace roadmarking
 					s = t;
 					viewer->addSphere(pt1, 0.1, 0.0, 0.0, 1.0, s);
 					n++;
-	
-	
+
 					pcl::PointXYZ pt2;
-					if (j == 6){
+					if (j == 6)
+					{
 						pt2.x = roadmarkings[i].polyline[0].x;
 						pt2.y = roadmarkings[i].polyline[0].y;
 						pt2.z = roadmarkings[i].polyline[0].z;
 					}
-					else{
+					else
+					{
 						pt2.x = roadmarkings[i].polyline[j + 1].x;
 						pt2.y = roadmarkings[i].polyline[j + 1].y;
 						pt2.z = roadmarkings[i].polyline[j + 1].z;
@@ -1401,17 +1055,17 @@ namespace roadmarking
 					s = t;
 					viewer->addSphere(pt2, 0.1, 0.0, 0.0, 1.0, s);
 					n++;
-	
+
 					sprintf(t, "%d", n);
 					s = t;
 					viewer->addLine(pt1, pt2, 0.0, 0.0, 1.0, s);
 					viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 1, s);
 					n++;
 				}
-	
+
 				break;
 			case 4:
-				for (int j = 0; j < 14; j++) //ֱ�Ҽ�ͷ
+				for (int j = 0; j < 14; j++) 
 				{
 					pcl::PointXYZ pt1;
 					pt1.x = roadmarkings[i].polyline[j].x;
@@ -1421,15 +1075,16 @@ namespace roadmarking
 					s = t;
 					viewer->addSphere(pt1, 0.1, 0.0, 1.0, 1.0, s);
 					n++;
-	
-	
+
 					pcl::PointXYZ pt2;
-					if (j == 13){
+					if (j == 13)
+					{
 						pt2.x = roadmarkings[i].polyline[0].x;
 						pt2.y = roadmarkings[i].polyline[0].y;
 						pt2.z = roadmarkings[i].polyline[0].z;
 					}
-					else{
+					else
+					{
 						pt2.x = roadmarkings[i].polyline[j + 1].x;
 						pt2.y = roadmarkings[i].polyline[j + 1].y;
 						pt2.z = roadmarkings[i].polyline[j + 1].z;
@@ -1438,17 +1093,17 @@ namespace roadmarking
 					s = t;
 					viewer->addSphere(pt2, 0.1, 0.0, 1.0, 1.0, s);
 					n++;
-	
+
 					sprintf(t, "%d", n);
 					s = t;
 					viewer->addLine(pt1, pt2, 0.0, 1.0, 1.0, s);
 					viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 1, s);
 					n++;
 				}
-	
+
 				break;
 			case 5:
-				for (int j = 0; j < 9; j++) //�Ҽ�ͷ
+				for (int j = 0; j < 9; j++) 
 				{
 					pcl::PointXYZ pt1;
 					pt1.x = roadmarkings[i].polyline[j].x;
@@ -1458,15 +1113,16 @@ namespace roadmarking
 					s = t;
 					viewer->addSphere(pt1, 0.1, 1.0, 0.0, 1.0, s);
 					n++;
-	
-	
+
 					pcl::PointXYZ pt2;
-					if (j == 8){
+					if (j == 8)
+					{
 						pt2.x = roadmarkings[i].polyline[0].x;
 						pt2.y = roadmarkings[i].polyline[0].y;
 						pt2.z = roadmarkings[i].polyline[0].z;
 					}
-					else{
+					else
+					{
 						pt2.x = roadmarkings[i].polyline[j + 1].x;
 						pt2.y = roadmarkings[i].polyline[j + 1].y;
 						pt2.z = roadmarkings[i].polyline[j + 1].z;
@@ -1475,17 +1131,17 @@ namespace roadmarking
 					s = t;
 					viewer->addSphere(pt2, 0.1, 1.0, 0.0, 1.0, s);
 					n++;
-	
+
 					sprintf(t, "%d", n);
 					s = t;
 					viewer->addLine(pt1, pt2, 1.0, 0.0, 1.0, s);
 					viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 1, s);
 					n++;
 				}
-	
+
 				break;
 			case 8:
-				for (int j = 0; j < 4; j++) //���α���
+				for (int j = 0; j < 4; j++) 
 				{
 					pcl::PointXYZ pt1;
 					pt1.x = roadmarkings[i].polyline[j].x;
@@ -1493,17 +1149,17 @@ namespace roadmarking
 					pt1.z = roadmarkings[i].polyline[j].z;
 					sprintf(t, "%d", n);
 					s = t;
-					viewer->addSphere(pt1, 0.1, 1.0, 1.0, 0.0, s); //��
+					viewer->addSphere(pt1, 0.1, 1.0, 1.0, 0.0, s); 
 					n++;
-	
-	
 					pcl::PointXYZ pt2;
-					if (j == 3){
+					if (j == 3)
+					{
 						pt2.x = roadmarkings[i].polyline[0].x;
 						pt2.y = roadmarkings[i].polyline[0].y;
 						pt2.z = roadmarkings[i].polyline[0].z;
 					}
-					else{
+					else
+					{
 						pt2.x = roadmarkings[i].polyline[j + 1].x;
 						pt2.y = roadmarkings[i].polyline[j + 1].y;
 						pt2.z = roadmarkings[i].polyline[j + 1].z;
@@ -1512,263 +1168,17 @@ namespace roadmarking
 					s = t;
 					viewer->addSphere(pt2, 0.1, 1.0, 1.0, 0.0, s);
 					n++;
-	
+
 					sprintf(t, "%d", n);
 					s = t;
 					viewer->addLine(pt1, pt2, 1.0, 1.0, 0.0, s);
 					viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 1, s);
 					n++;
 				}
-	
+
 				break;
 			default:
 				break;
-	
-			}
-		}
-		cout << "Click X(close) to continue..." << endl;
-		while (!viewer->wasStopped())
-		{
-			viewer->spinOnce(100);
-			boost::this_thread::sleep(boost::posix_time::microseconds(100000));
-		}
-	
-	}
-	
-	void DataIo::displaymarkVect(const RoadMarkings &roadmarkings, const RoadMarkings &sideline_markings)
-	{
-		boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer(new pcl::visualization::PCLVisualizer("Vectorization Viewer"));
-		viewer->setBackgroundColor(0, 0, 0);
-		char t[256];
-		string s;
-		int n = 0;
-	
-		for (int i = 0; i < sideline_markings.size(); i++)//������
-		{
-			for (int j = 0; j <sideline_markings[i].polyline.size() - 1; j++)
-			{
-				pcl::PointXYZ pt1;
-				pt1.x = sideline_markings[i].polyline[j].x;
-				pt1.y = sideline_markings[i].polyline[j].y;
-				pt1.z = sideline_markings[i].polyline[j].z;
-				sprintf(t, "%d", n);
-				s = t;
-				viewer->addSphere(pt1, 0.1, 0.0, 1.0, 0.0, s);
-				n++;
-	
-				pcl::PointXYZ pt2;
-				pt2.x = sideline_markings[i].polyline[j + 1].x;
-				pt2.y = sideline_markings[i].polyline[j + 1].y;
-				pt2.z = sideline_markings[i].polyline[j + 1].z;
-	
-				sprintf(t, "%d", n);
-				s = t;
-				viewer->addSphere(pt2, 0.1, 0.0, 1.0, 0.0, s);
-				n++;
-	
-				sprintf(t, "%d", n);
-				s = t;
-				viewer->addLine(pt1, pt2, 0.0, 1.0, 0.0, s);
-				viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 1, s);
-				n++;
-			}
-		}
-	
-		for (int i = 0; i < roadmarkings.size(); i++)
-		{
-			switch (roadmarkings[i].category)
-			{
-			case 2:
-				for (int j = 0; j < 4; j++) //�������
-				{
-					pcl::PointXYZ pt1;
-					pt1.x = roadmarkings[i].polyline[j].x;
-					pt1.y = roadmarkings[i].polyline[j].y;
-					pt1.z = roadmarkings[i].polyline[j].z;
-					sprintf(t, "%d", n);
-					s = t;
-					viewer->addSphere(pt1, 0.1, 1.0, 0.0, 0.0, s);
-					n++;
-	
-	
-					pcl::PointXYZ pt2;
-					if (j == 3){
-						pt2.x = roadmarkings[i].polyline[0].x;
-						pt2.y = roadmarkings[i].polyline[0].y;
-						pt2.z = roadmarkings[i].polyline[0].z;
-					}
-					else{
-						pt2.x = roadmarkings[i].polyline[j + 1].x;
-						pt2.y = roadmarkings[i].polyline[j + 1].y;
-						pt2.z = roadmarkings[i].polyline[j + 1].z;
-					}
-					sprintf(t, "%d", n);
-					s = t;
-					viewer->addSphere(pt2, 0.1, 1.0, 0.0, 0.0, s);
-					n++;
-	
-					sprintf(t, "%d", n);
-					s = t;
-					viewer->addLine(pt1, pt2, 1.0, 0.0, 0.0, s);
-					viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 1, s);
-					n++;
-				}
-	
-				break;
-	
-			case 3:
-				for (int j = 0; j < 7; j++) //ֱ��ͷ
-				{
-					pcl::PointXYZ pt1;
-					pt1.x = roadmarkings[i].polyline[j].x;
-					pt1.y = roadmarkings[i].polyline[j].y;
-					pt1.z = roadmarkings[i].polyline[j].z;
-					sprintf(t, "%d", n);
-					s = t;
-					viewer->addSphere(pt1, 0.1, 0.0, 0.0, 1.0, s);
-					n++;
-	
-	
-					pcl::PointXYZ pt2;
-					if (j == 6){
-						pt2.x = roadmarkings[i].polyline[0].x;
-						pt2.y = roadmarkings[i].polyline[0].y;
-						pt2.z = roadmarkings[i].polyline[0].z;
-					}
-					else{
-						pt2.x = roadmarkings[i].polyline[j + 1].x;
-						pt2.y = roadmarkings[i].polyline[j + 1].y;
-						pt2.z = roadmarkings[i].polyline[j + 1].z;
-					}
-					sprintf(t, "%d", n);
-					s = t;
-					viewer->addSphere(pt2, 0.1, 0.0, 0.0, 1.0, s);
-					n++;
-	
-					sprintf(t, "%d", n);
-					s = t;
-					viewer->addLine(pt1, pt2, 0.0, 0.0, 1.0, s);
-					viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 1, s);
-					n++;
-				}
-	
-				break;
-			case 4:
-				for (int j = 0; j < 14; j++) //ֱ�Ҽ�ͷ
-				{
-					pcl::PointXYZ pt1;
-					pt1.x = roadmarkings[i].polyline[j].x;
-					pt1.y = roadmarkings[i].polyline[j].y;
-					pt1.z = roadmarkings[i].polyline[j].z;
-					sprintf(t, "%d", n);
-					s = t;
-					viewer->addSphere(pt1, 0.1, 0.0, 1.0, 1.0, s);
-					n++;
-	
-	
-					pcl::PointXYZ pt2;
-					if (j == 13){
-						pt2.x = roadmarkings[i].polyline[0].x;
-						pt2.y = roadmarkings[i].polyline[0].y;
-						pt2.z = roadmarkings[i].polyline[0].z;
-					}
-					else{
-						pt2.x = roadmarkings[i].polyline[j + 1].x;
-						pt2.y = roadmarkings[i].polyline[j + 1].y;
-						pt2.z = roadmarkings[i].polyline[j + 1].z;
-					}
-					sprintf(t, "%d", n);
-					s = t;
-					viewer->addSphere(pt2, 0.1, 0.0, 1.0, 1.0, s);
-					n++;
-	
-					sprintf(t, "%d", n);
-					s = t;
-					viewer->addLine(pt1, pt2, 0.0, 1.0, 1.0, s);
-					viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 1, s);
-					n++;
-				}
-	
-				break;
-			case 5:
-				for (int j = 0; j < 9; j++) //�Ҽ�ͷ
-				{
-					pcl::PointXYZ pt1;
-					pt1.x = roadmarkings[i].polyline[j].x;
-					pt1.y = roadmarkings[i].polyline[j].y;
-					pt1.z = roadmarkings[i].polyline[j].z;
-					sprintf(t, "%d", n);
-					s = t;
-					viewer->addSphere(pt1, 0.1, 1.0, 0.0, 1.0, s);
-					n++;
-	
-	
-					pcl::PointXYZ pt2;
-					if (j == 8){
-						pt2.x = roadmarkings[i].polyline[0].x;
-						pt2.y = roadmarkings[i].polyline[0].y;
-						pt2.z = roadmarkings[i].polyline[0].z;
-					}
-					else{
-						pt2.x = roadmarkings[i].polyline[j + 1].x;
-						pt2.y = roadmarkings[i].polyline[j + 1].y;
-						pt2.z = roadmarkings[i].polyline[j + 1].z;
-					}
-					sprintf(t, "%d", n);
-					s = t;
-					viewer->addSphere(pt2, 0.1, 1.0, 0.0, 1.0, s);
-					n++;
-	
-					sprintf(t, "%d", n);
-					s = t;
-					viewer->addLine(pt1, pt2, 1.0, 0.0, 1.0, s);
-					viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 1, s);
-					n++;
-				}
-	
-				break;
-			case 8:
-				for (int j = 0; j < 4; j++) //���α���
-				{
-					pcl::PointXYZ pt1;
-					pt1.x = roadmarkings[i].polyline[j].x;
-					pt1.y = roadmarkings[i].polyline[j].y;
-					pt1.z = roadmarkings[i].polyline[j].z;
-					sprintf(t, "%d", n);
-					s = t;
-					viewer->addSphere(pt1, 0.1, 1.0, 1.0, 0.0, s); //��
-					n++;
-	
-	
-					pcl::PointXYZ pt2;
-					if (j == 3){
-						pt2.x = roadmarkings[i].polyline[0].x;
-						pt2.y = roadmarkings[i].polyline[0].y;
-						pt2.z = roadmarkings[i].polyline[0].z;
-					}
-					else{
-						pt2.x = roadmarkings[i].polyline[j + 1].x;
-						pt2.y = roadmarkings[i].polyline[j + 1].y;
-						pt2.z = roadmarkings[i].polyline[j + 1].z;
-					}
-					sprintf(t, "%d", n);
-					s = t;
-					viewer->addSphere(pt2, 0.1, 1.0, 1.0, 0.0, s);
-					n++;
-	
-					sprintf(t, "%d", n);
-					s = t;
-					viewer->addLine(pt1, pt2, 1.0, 1.0, 0.0, s);
-					viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 1, s);
-					n++;
-				}
-	
-				break;
-	
-			default:
-				break;
-	
-	
 			}
 		}
 		cout << "Click X(close) to continue..." << endl;
@@ -1779,7 +1189,251 @@ namespace roadmarking
 		}
 	}
 
-	bool DataIo::readLasFileHeader(const std::string &fileName, liblas::Header& header)
+	void DataIo::displaymarkVect(const RoadMarkings &roadmarkings, const RoadMarkings &sideline_markings)
+	{
+		boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer(new pcl::visualization::PCLVisualizer("Vectorization Viewer"));
+		viewer->setBackgroundColor(0, 0, 0);
+		char t[256];
+		string s;
+		int n = 0;
+
+		for (int i = 0; i < sideline_markings.size(); i++) 
+		{
+			for (int j = 0; j < sideline_markings[i].polyline.size() - 1; j++)
+			{
+				pcl::PointXYZ pt1;
+				pt1.x = sideline_markings[i].polyline[j].x;
+				pt1.y = sideline_markings[i].polyline[j].y;
+				pt1.z = sideline_markings[i].polyline[j].z;
+				sprintf(t, "%d", n);
+				s = t;
+				viewer->addSphere(pt1, 0.1, 0.0, 1.0, 0.0, s);
+				n++;
+
+				pcl::PointXYZ pt2;
+				pt2.x = sideline_markings[i].polyline[j + 1].x;
+				pt2.y = sideline_markings[i].polyline[j + 1].y;
+				pt2.z = sideline_markings[i].polyline[j + 1].z;
+
+				sprintf(t, "%d", n);
+				s = t;
+				viewer->addSphere(pt2, 0.1, 0.0, 1.0, 0.0, s);
+				n++;
+
+				sprintf(t, "%d", n);
+				s = t;
+				viewer->addLine(pt1, pt2, 0.0, 1.0, 0.0, s);
+				viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 1, s);
+				n++;
+			}
+		}
+
+		for (int i = 0; i < roadmarkings.size(); i++)
+		{
+			switch (roadmarkings[i].category)
+			{
+			case 2:
+				for (int j = 0; j < 4; j++) 
+				{
+					pcl::PointXYZ pt1;
+					pt1.x = roadmarkings[i].polyline[j].x;
+					pt1.y = roadmarkings[i].polyline[j].y;
+					pt1.z = roadmarkings[i].polyline[j].z;
+					sprintf(t, "%d", n);
+					s = t;
+					viewer->addSphere(pt1, 0.1, 1.0, 0.0, 0.0, s);
+					n++;
+
+					pcl::PointXYZ pt2;
+					if (j == 3)
+					{
+						pt2.x = roadmarkings[i].polyline[0].x;
+						pt2.y = roadmarkings[i].polyline[0].y;
+						pt2.z = roadmarkings[i].polyline[0].z;
+					}
+					else
+					{
+						pt2.x = roadmarkings[i].polyline[j + 1].x;
+						pt2.y = roadmarkings[i].polyline[j + 1].y;
+						pt2.z = roadmarkings[i].polyline[j + 1].z;
+					}
+					sprintf(t, "%d", n);
+					s = t;
+					viewer->addSphere(pt2, 0.1, 1.0, 0.0, 0.0, s);
+					n++;
+
+					sprintf(t, "%d", n);
+					s = t;
+					viewer->addLine(pt1, pt2, 1.0, 0.0, 0.0, s);
+					viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 1, s);
+					n++;
+				}
+
+				break;
+
+			case 3:
+				for (int j = 0; j < 7; j++) 
+				{
+					pcl::PointXYZ pt1;
+					pt1.x = roadmarkings[i].polyline[j].x;
+					pt1.y = roadmarkings[i].polyline[j].y;
+					pt1.z = roadmarkings[i].polyline[j].z;
+					sprintf(t, "%d", n);
+					s = t;
+					viewer->addSphere(pt1, 0.1, 0.0, 0.0, 1.0, s);
+					n++;
+
+					pcl::PointXYZ pt2;
+					if (j == 6)
+					{
+						pt2.x = roadmarkings[i].polyline[0].x;
+						pt2.y = roadmarkings[i].polyline[0].y;
+						pt2.z = roadmarkings[i].polyline[0].z;
+					}
+					else
+					{
+						pt2.x = roadmarkings[i].polyline[j + 1].x;
+						pt2.y = roadmarkings[i].polyline[j + 1].y;
+						pt2.z = roadmarkings[i].polyline[j + 1].z;
+					}
+					sprintf(t, "%d", n);
+					s = t;
+					viewer->addSphere(pt2, 0.1, 0.0, 0.0, 1.0, s);
+					n++;
+
+					sprintf(t, "%d", n);
+					s = t;
+					viewer->addLine(pt1, pt2, 0.0, 0.0, 1.0, s);
+					viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 1, s);
+					n++;
+				}
+
+				break;
+			case 4:
+				for (int j = 0; j < 14; j++) 
+				{
+					pcl::PointXYZ pt1;
+					pt1.x = roadmarkings[i].polyline[j].x;
+					pt1.y = roadmarkings[i].polyline[j].y;
+					pt1.z = roadmarkings[i].polyline[j].z;
+					sprintf(t, "%d", n);
+					s = t;
+					viewer->addSphere(pt1, 0.1, 0.0, 1.0, 1.0, s);
+					n++;
+
+					pcl::PointXYZ pt2;
+					if (j == 13)
+					{
+						pt2.x = roadmarkings[i].polyline[0].x;
+						pt2.y = roadmarkings[i].polyline[0].y;
+						pt2.z = roadmarkings[i].polyline[0].z;
+					}
+					else
+					{
+						pt2.x = roadmarkings[i].polyline[j + 1].x;
+						pt2.y = roadmarkings[i].polyline[j + 1].y;
+						pt2.z = roadmarkings[i].polyline[j + 1].z;
+					}
+					sprintf(t, "%d", n);
+					s = t;
+					viewer->addSphere(pt2, 0.1, 0.0, 1.0, 1.0, s);
+					n++;
+
+					sprintf(t, "%d", n);
+					s = t;
+					viewer->addLine(pt1, pt2, 0.0, 1.0, 1.0, s);
+					viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 1, s);
+					n++;
+				}
+
+				break;
+			case 5:
+				for (int j = 0; j < 9; j++) 
+				{
+					pcl::PointXYZ pt1;
+					pt1.x = roadmarkings[i].polyline[j].x;
+					pt1.y = roadmarkings[i].polyline[j].y;
+					pt1.z = roadmarkings[i].polyline[j].z;
+					sprintf(t, "%d", n);
+					s = t;
+					viewer->addSphere(pt1, 0.1, 1.0, 0.0, 1.0, s);
+					n++;
+
+					pcl::PointXYZ pt2;
+					if (j == 8)
+					{
+						pt2.x = roadmarkings[i].polyline[0].x;
+						pt2.y = roadmarkings[i].polyline[0].y;
+						pt2.z = roadmarkings[i].polyline[0].z;
+					}
+					else
+					{
+						pt2.x = roadmarkings[i].polyline[j + 1].x;
+						pt2.y = roadmarkings[i].polyline[j + 1].y;
+						pt2.z = roadmarkings[i].polyline[j + 1].z;
+					}
+					sprintf(t, "%d", n);
+					s = t;
+					viewer->addSphere(pt2, 0.1, 1.0, 0.0, 1.0, s);
+					n++;
+
+					sprintf(t, "%d", n);
+					s = t;
+					viewer->addLine(pt1, pt2, 1.0, 0.0, 1.0, s);
+					viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 1, s);
+					n++;
+				}
+				break;
+			case 8:
+				for (int j = 0; j < 4; j++)
+				{
+					pcl::PointXYZ pt1;
+					pt1.x = roadmarkings[i].polyline[j].x;
+					pt1.y = roadmarkings[i].polyline[j].y;
+					pt1.z = roadmarkings[i].polyline[j].z;
+					sprintf(t, "%d", n);
+					s = t;
+					viewer->addSphere(pt1, 0.1, 1.0, 1.0, 0.0, s); 
+					n++;
+
+					pcl::PointXYZ pt2;
+					if (j == 3)
+					{
+						pt2.x = roadmarkings[i].polyline[0].x;
+						pt2.y = roadmarkings[i].polyline[0].y;
+						pt2.z = roadmarkings[i].polyline[0].z;
+					}
+					else
+					{
+						pt2.x = roadmarkings[i].polyline[j + 1].x;
+						pt2.y = roadmarkings[i].polyline[j + 1].y;
+						pt2.z = roadmarkings[i].polyline[j + 1].z;
+					}
+					sprintf(t, "%d", n);
+					s = t;
+					viewer->addSphere(pt2, 0.1, 1.0, 1.0, 0.0, s);
+					n++;
+
+					sprintf(t, "%d", n);
+					s = t;
+					viewer->addLine(pt1, pt2, 1.0, 1.0, 0.0, s);
+					viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 1, s);
+					n++;
+				}
+				break;
+			default:
+				break;
+			}
+		}
+		cout << "Click X(close) to continue..." << endl;
+		while (!viewer->wasStopped())
+		{
+			viewer->spinOnce(100);
+			boost::this_thread::sleep(boost::posix_time::microseconds(100000));
+		}
+	}
+
+	bool DataIo::readLasFileHeader(const std::string &fileName, liblas::Header &header)
 	{
 		if (fileName.substr(fileName.rfind('.')).compare(".las"))
 		{
@@ -1793,288 +1447,75 @@ namespace roadmarking
 			{
 				return 0;
 			}
-	
+
 			liblas::ReaderFactory f;
 			liblas::Reader reader = f.CreateWithStream(ifs);
-	
+
 			header = reader.GetHeader();
 		}
-	
+
 		return 1;
 	}
 
-	bool DataIo::writemarkVectDXF(const RoadMarkings &roadmarkings)
-	{
-		
-		DL_Dxf dxf;
-		DL_WriterA* dw = dxf.out("DXFTest.dxf", DL_Codes::AC1015);
-	
-		// section header:
-		dxf.writeHeader(*dw);
-		dw->sectionEnd();
-	
-		// section tables:
-		dw->sectionTables();
-	
-		// VPORT:
-		dxf.writeVPort(*dw);
-	
-		// LTYPE:
-		dw->tableLinetypes(3);
-		dxf.writeLinetype(*dw, DL_LinetypeData("CONTINUOUS", "Continuous", 0, 0, 0.0));
-		dxf.writeLinetype(*dw, DL_LinetypeData("BYLAYER", "", 0, 0, 0.0));
-		dxf.writeLinetype(*dw, DL_LinetypeData("BYBLOCK", "", 0, 0, 0.0));
-		dw->tableEnd();
-	
-		// LAYER:
-		dw->tableLayers(5);
-		
-		dxf.writeLayer(
-			*dw,
-			DL_LayerData("0", 0),
-			DL_Attributes("", 1, 0x00ff0000, 15, "CONTINUOUS")//15 �߿�  ��ɫ  ��׼ͼ��
-			);
-		
-	
-		dxf.writeLayer(
-			*dw,
-			DL_LayerData("Side Lines", 0),
-			DL_Attributes("", 1, 0x0000ff00, 15, "CONTINUOUS") //15 �߿�  0x00RRGGBB  ��ɫ  ��16���ƣ� 0x0000ff00Ϊ��ɫ
-			);
-	
-		dxf.writeLayer(
-			*dw,
-			DL_LayerData("Rectangle Road Markings", 0),
-			DL_Attributes("", 1, 0x00ff0000, 15, "CONTINUOUS") // ��ɫ
-			);
-	
-		dxf.writeLayer(
-			*dw,
-			DL_LayerData("Arrows", 0),
-			DL_Attributes("", 1, 0x000000ff, 15, "CONTINUOUS") // ��ɫ
-			);
-	
-		dxf.writeLayer(
-			*dw,
-			DL_LayerData("Others", 0),
-			DL_Attributes("", 1, 0x00ffff00, 15, "CONTINUOUS") // ��ɫ
-			);
-	
-		dw->tableEnd();
-	
-		// STYLE:
-		dw->tableStyle(1);
-		DL_StyleData style("Standard", 0, 0.0, 1.0, 0.0, 0, 2.5, "txt", "");
-		style.bold = false;
-		style.italic = false;
-		dxf.writeStyle(*dw, style);
-		dw->tableEnd();
-	
-		// VIEW:
-		dxf.writeView(*dw);
-	
-		// UCS:
-		dxf.writeUcs(*dw);
-	
-		// APPID:
-		dw->tableAppid(1);
-		dxf.writeAppid(*dw, "ACAD");
-		dw->tableEnd();
-	
-		// DIMSTYLE:
-		dxf.writeDimStyle(*dw, 2.5, 0.625, 0.625, 0.625, 2.5);
-	
-		// BLOCK_RECORD:
-		dxf.writeBlockRecord(*dw);
-		dw->tableEnd();
-	
-		dw->sectionEnd();
-	
-		// BLOCK:
-		dw->sectionBlocks();
-		dxf.writeBlock(*dw, DL_BlockData("*Model_Space", 0, 0.0, 0.0, 0.0));
-		dxf.writeEndBlock(*dw, "*Model_Space");
-		dxf.writeBlock(*dw, DL_BlockData("*Paper_Space", 0, 0.0, 0.0, 0.0));
-		dxf.writeEndBlock(*dw, "*Paper_Space");
-		dxf.writeBlock(*dw, DL_BlockData("*Paper_Space0", 0, 0.0, 0.0, 0.0));
-		dxf.writeEndBlock(*dw, "*Paper_Space0");
-		dw->sectionEnd();
-	
-		// ENTITIES:
-		dw->sectionEntities();
-	
-		DL_Attributes attributes("0", 256, 0x00000000, 5, "BYLAYER");
-		DL_Attributes attributes_side_line("Side Lines", 256, 0x0000ff00, 5, "BYLAYER"); //��
-		DL_Attributes attributes_rectangle("Rectangle Road Markings", 256, 0x00ff0000, 5, "BYLAYER");  //��
-		DL_Attributes attributes_arrow("Arrows", 256, 0x000000ff, 5, "BYLAYER");  //��
-		DL_Attributes attributes_others("Others", 256, 0x00ffff00, 5, "BYLAYER");  //��
-		/*
-		// LINE:
-		DL_LineData lineData(10, 5, 0, 30, 5, 0);
-		dxf.writeLine(*dw, lineData, attributes);
-	
-		// CIRCLE
-		DL_CircleData circleData(10, 10, 0, 4);
-		dxf.writeCircle(*dw, circleData, attributes);
-		*/
-		bool plineGen = true;
-		//bool Isclosed;
-		for (int i = 0; i < roadmarkings.size(); i++)
-		{
-			if (roadmarkings[i].category >= 1){
-	
-				int count = roadmarkings[i].polyline.size();
-	
-				//�Ƿ�պϣ�1�೤���߲��ñպ�
-				switch (roadmarkings[i].category)
-				{
-				case 1:
-					dxf.writePolyline(
-						*dw,
-						DL_PolylineData(count,
-						0, 0,
-						false * 0x1 + plineGen * 0x80),
-						attributes_side_line);
-					break;
-				case 2:
-					dxf.writePolyline(
-						*dw,
-						DL_PolylineData(count,
-						0, 0,
-						true * 0x1 + plineGen * 0x80),
-						attributes_rectangle);
-					break;
-				case 3:
-					dxf.writePolyline(
-						*dw,
-						DL_PolylineData(count,
-						0, 0,
-						true * 0x1 + plineGen * 0x80),
-						attributes_arrow);
-					break;
-				case 4:
-					dxf.writePolyline(
-						*dw,
-						DL_PolylineData(count,
-						0, 0,
-						true * 0x1 + plineGen * 0x80),
-						attributes_arrow);
-					break;
-				case 5:
-					dxf.writePolyline(
-						*dw,
-						DL_PolylineData(count,
-						0, 0,
-						true * 0x1 + plineGen * 0x80),
-						attributes_arrow);
-					break;
-				case 6:
-					dxf.writePolyline(
-						*dw,
-						DL_PolylineData(count,
-						0, 0,
-						true * 0x1 + plineGen * 0x80),
-						attributes_arrow);
-					break;
-				case 8:
-					dxf.writePolyline(
-						*dw,
-						DL_PolylineData(count,
-						0, 0,
-						true * 0x1 + plineGen * 0x80),
-						attributes_others);
-					break;
-				
-				default:
-					break;
-				}
-				
-				
-				//���긳ֵ
-				for (int j = 0; j < count; j++) {
-				
-					double bulge = 0;
-					dxf.writeVertex(*dw, DL_VertexData(roadmarkings[i].polyline[j].x, roadmarkings[i].polyline[j].y, roadmarkings[i].polyline[j].z, bulge));
-				}
-	
-				dxf.writePolylineEnd(*dw);
-			}
-		}
-		
-		// end section ENTITIES:
-		dw->sectionEnd();
-		dxf.writeObjects(*dw, "MY_OBJECTS");
-		dxf.writeObjectsEnd(*dw);
-	
-		dw->dxfEOF();
-		dw->close();
-		delete dw;
-	
-	cout << "Output DXF done" << endl;
-	return true;
-	}
-	
-	bool DataIo::writemarkVectDXF(int file_index, const std::string & foldername, const RoadMarkings &roadmarkings, const RoadMarkings &sideline_markings, 
-	     double minX, double minY)
+	bool DataIo::writemarkVectDXF(int file_index, const std::string &foldername, const RoadMarkings &roadmarkings, const RoadMarkings &sideline_markings,
+								  double minX, double minY)
 	{
 		std::string dxf_filename = foldername + ".dxf";
-	
-	
+
 		DL_Dxf dxf;
-		DL_WriterA* dw = dxf.out(dxf_filename.data(), DL_Codes::AC1015);
-	
+		DL_WriterA *dw = dxf.out(dxf_filename.data(), DL_Codes::AC1015);
+
 		// section header:
 		dxf.writeHeader(*dw);
 		dw->sectionEnd();
-	
+
 		// section tables:
 		dw->sectionTables();
-	
+
 		// VPORT:
 		dxf.writeVPort(*dw);
-	
+
 		// LTYPE:
 		dw->tableLinetypes(3);
 		dxf.writeLinetype(*dw, DL_LinetypeData("CONTINUOUS", "Continuous", 0, 0, 0.0));
 		dxf.writeLinetype(*dw, DL_LinetypeData("BYLAYER", "", 0, 0, 0.0));
 		dxf.writeLinetype(*dw, DL_LinetypeData("BYBLOCK", "", 0, 0, 0.0));
 		dw->tableEnd();
-	
+
 		// LAYER:
 		dw->tableLayers(5);
-	
+
 		dxf.writeLayer(
 			*dw,
 			DL_LayerData("0", 0),
-			DL_Attributes("", 1, 0x00ff0000, 15, "CONTINUOUS")//15 �߿�  ��ɫ  ��׼ͼ��
-			);
-	
-	
+			DL_Attributes("", 1, 0x00ff0000, 15, "CONTINUOUS") 
+		);
+
 		dxf.writeLayer(
 			*dw,
 			DL_LayerData("Side Lines", 0),
-			DL_Attributes("", 1, 0x0000ff00, 15, "CONTINUOUS") //15 �߿�  0x00RRGGBB  ��ɫ  ��16���ƣ� 0x0000ff00Ϊ��ɫ
-			);
-	
+			DL_Attributes("", 1, 0x0000ff00, 15, "CONTINUOUS") 
+		);
+
 		dxf.writeLayer(
 			*dw,
 			DL_LayerData("Rectangle Road Markings", 0),
-			DL_Attributes("", 1, 0x00ff0000, 15, "CONTINUOUS") // ��ɫ
-			);
-	
+			DL_Attributes("", 1, 0x00ff0000, 15, "CONTINUOUS") 
+		);
+
 		dxf.writeLayer(
 			*dw,
 			DL_LayerData("Arrows", 0),
-			DL_Attributes("", 1, 0x000000ff, 15, "CONTINUOUS") // ��ɫ
-			);
-	
+			DL_Attributes("", 1, 0x000000ff, 15, "CONTINUOUS") 
+		);
+
 		dxf.writeLayer(
 			*dw,
 			DL_LayerData("Others", 0),
-			DL_Attributes("", 1, 0x00ffff00, 15, "CONTINUOUS") // ��ɫ
-			);
+			DL_Attributes("", 1, 0x00ffff00, 15, "CONTINUOUS") 
+		);
 		dw->tableEnd();
-	
+
 		// STYLE:
 		dw->tableStyle(1);
 		DL_StyleData style("Standard", 0, 0.0, 1.0, 0.0, 0, 2.5, "txt", "");
@@ -2082,27 +1523,27 @@ namespace roadmarking
 		style.italic = false;
 		dxf.writeStyle(*dw, style);
 		dw->tableEnd();
-	
+
 		// VIEW:
 		dxf.writeView(*dw);
-	
+
 		// UCS:
 		dxf.writeUcs(*dw);
-	
+
 		// APPID:
 		dw->tableAppid(1);
 		dxf.writeAppid(*dw, "ACAD");
 		dw->tableEnd();
-	
+
 		// DIMSTYLE:
 		dxf.writeDimStyle(*dw, 2.5, 0.625, 0.625, 0.625, 2.5);
-	
+
 		// BLOCK_RECORD:
 		dxf.writeBlockRecord(*dw);
 		dw->tableEnd();
-	
+
 		dw->sectionEnd();
-	
+
 		// BLOCK:
 		dw->sectionBlocks();
 		dxf.writeBlock(*dw, DL_BlockData("*Model_Space", 0, 0.0, 0.0, 0.0));
@@ -2112,132 +1553,118 @@ namespace roadmarking
 		dxf.writeBlock(*dw, DL_BlockData("*Paper_Space0", 0, 0.0, 0.0, 0.0));
 		dxf.writeEndBlock(*dw, "*Paper_Space0");
 		dw->sectionEnd();
-	
+
 		// ENTITIES:
 		dw->sectionEntities();
-	
+
 		DL_Attributes attributes("0", 256, 0x00000000, 5, "BYLAYER");
-		DL_Attributes attributes_side_line("Side Lines", 256, 0x0000ff00, 5, "BYLAYER"); //��
-		DL_Attributes attributes_rectangle("Rectangle Road Markings", 256, 0x00ff0000, 5, "BYLAYER");  //��
-		DL_Attributes attributes_arrow("Arrows", 256, 0x000000ff, 5, "BYLAYER");  //��
-		DL_Attributes attributes_others("Others", 256, 0x00ffff00, 5, "BYLAYER");  //��
-	
-		/*
-		// LINE:
-		DL_LineData lineData(10, 5, 0, 30, 5, 0);
-		dxf.writeLine(*dw, lineData, attributes);
-	
-		// CIRCLE
-		DL_CircleData circleData(10, 10, 0, 4);
-		dxf.writeCircle(*dw, circleData, attributes);
-		*/
+		DL_Attributes attributes_side_line("Side Lines", 256, 0x0000ff00, 5, "BYLAYER");			  
+		DL_Attributes attributes_rectangle("Rectangle Road Markings", 256, 0x00ff0000, 5, "BYLAYER"); 
+		DL_Attributes attributes_arrow("Arrows", 256, 0x000000ff, 5, "BYLAYER");					 
+		DL_Attributes attributes_others("Others", 256, 0x00ffff00, 5, "BYLAYER");					 
+
 		bool plineGen = true;
-		//bool Isclosed;
-		
+
 		for (int i = 0; i < sideline_markings.size(); i++)
 		{
-			
 			dxf.writePolyline(
 				*dw,
 				DL_PolylineData(sideline_markings[i].polyline.size(), 0, 0, false * 0x1 + plineGen * 0x80),
 				attributes_side_line);
-	
-	
-			for (int j = 0; j < sideline_markings[i].polyline.size(); j++) {
-	
+			for (int j = 0; j < sideline_markings[i].polyline.size(); j++)
+			{
 				double bulge = 0;
 				dxf.writeVertex(*dw, DL_VertexData(sideline_markings[i].polyline[j].x + minX, sideline_markings[i].polyline[j].y + minY, sideline_markings[i].polyline[j].z, bulge));
 			}
-	
 			dxf.writePolylineEnd(*dw);
 		}
-	
+
 		for (int i = 0; i < roadmarkings.size(); i++)
 		{
-			if (roadmarkings[i].category >= 2){
-	
+			if (roadmarkings[i].category >= 2)
+			{
+
 				int count = roadmarkings[i].polyline.size();
-	
-				//�Ƿ�պϣ�1�೤���߲��ñպ�
 				switch (roadmarkings[i].category)
 				{
 				case 2:
 					dxf.writePolyline(
 						*dw,
 						DL_PolylineData(count,
-						0, 0,
-						true * 0x1 + plineGen * 0x80),
+										0, 0,
+										true * 0x1 + plineGen * 0x80),
 						attributes_rectangle);
 					break;
 				case 3:
 					dxf.writePolyline(
 						*dw,
 						DL_PolylineData(count,
-						0, 0,
-						true * 0x1 + plineGen * 0x80),
+										0, 0,
+										true * 0x1 + plineGen * 0x80),
 						attributes_arrow);
 					break;
 				case 4:
 					dxf.writePolyline(
 						*dw,
 						DL_PolylineData(count,
-						0, 0,
-						true * 0x1 + plineGen * 0x80),
+										0, 0,
+										true * 0x1 + plineGen * 0x80),
 						attributes_arrow);
 					break;
 				case 5:
 					dxf.writePolyline(
 						*dw,
 						DL_PolylineData(count,
-						0, 0,
-						true * 0x1 + plineGen * 0x80),
+										0, 0,
+										true * 0x1 + plineGen * 0x80),
 						attributes_arrow);
 					break;
 				case 6:
 					dxf.writePolyline(
 						*dw,
 						DL_PolylineData(count,
-						0, 0,
-						true * 0x1 + plineGen * 0x80),
+										0, 0,
+										true * 0x1 + plineGen * 0x80),
 						attributes_arrow);
+					break;
+				case 7:
+					dxf.writePolyline(
+						*dw,
+						DL_PolylineData(count,
+										0, 0,
+										true * 0x1 + plineGen * 0x80),
+						attributes_others);
 					break;
 				case 8:
 					dxf.writePolyline(
 						*dw,
 						DL_PolylineData(count,
-						0, 0,
-						true * 0x1 + plineGen * 0x80),
+										0, 0,
+										true * 0x1 + plineGen * 0x80),
 						attributes_others);
 					break;
 				default:
 					break;
 				}
-	
-	
-				//���긳ֵ
-				for (int j = 0; j < count; j++) {
-	
-					double bulge = 0;
-					dxf.writeVertex(*dw, DL_VertexData(roadmarkings[i].polyline[j].x + minX, roadmarkings[i].polyline[j].y + minY, roadmarkings[i].polyline[j].z, bulge));
-				}
-	
+
+				for (int j = 0; j < count; j++)
+					dxf.writeVertex(*dw, DL_VertexData(roadmarkings[i].polyline[j].x + minX, roadmarkings[i].polyline[j].y + minY, roadmarkings[i].polyline[j].z, 0));
+				
 				dxf.writePolylineEnd(*dw);
 			}
 		}
-	
+
 		// end section ENTITIES:
 		dw->sectionEnd();
 		dxf.writeObjects(*dw, "MY_OBJECTS");
 		dxf.writeObjectsEnd(*dw);
-	
+
 		dw->dxfEOF();
 		dw->close();
 		delete dw;
 		cout << "Output DXF file done" << endl;
 		return true;
-	
 	}
-
 
 	bool DataIo::readLasFile(const std::string &fileName, pcl::PointCloud<pcl::PointXYZI> &pointCloud)
 	{
@@ -2245,18 +1672,17 @@ namespace roadmarking
 		{
 			return 0;
 		}
-	
+
 		std::ifstream ifs;
 		ifs.open(fileName, std::ios::in | std::ios::binary);
 		if (ifs.bad())
 		{
-			cout << "δ����ƥ����" << endl;
+			cout << "Failed" << endl;
 		}
 		liblas::ReaderFactory f;
 		liblas::Reader reader = f.CreateWithStream(ifs);
-		liblas::Header const& header = reader.GetHeader();
-	
-		//header�����ֱ����bounding box ����
+		liblas::Header const &header = reader.GetHeader();
+
 		double Xmin, Ymin, Zmin, Xmax, Ymax, Zmax;
 		Xmin = header.GetMinX();
 		Ymin = header.GetMinY();
@@ -2264,47 +1690,38 @@ namespace roadmarking
 		Xmax = header.GetMaxX();
 		Ymax = header.GetMaxY();
 		Zmax = header.GetMaxZ();
-	
-		//int i = 0;
-		/*whileѭ���б������еĵ�;*/
+
 		while (reader.ReadNextPoint())
 		{
-			const liblas::Point& p = reader.GetPoint();
+			const liblas::Point &p = reader.GetPoint();
 			//i++;
-			pcl::PointXYZI  pt;
-			/*�����Ļ���������ǿ��ֵ��ֵ��PCL�еĵ�;*/
-			/*��һ��ƽ�ƣ�������WGS84 �µĵ�����̫���ˣ�����ɾ�����ʧ�� ��Ϊlas�Ķ�ȡ��������double�ģ���pcd��int��*/
+			pcl::PointXYZI pt;
 			pt.x = p.GetX() - Xmin;
 			pt.y = p.GetY() - Ymin;
 			pt.z = p.GetZ();
 			pt.intensity = p.GetIntensity();
-			//if (i % 100 == 0) { cout << p.GetPointSourceID() << "\t" << p.GetTime() << endl; } //��ЩPointSourceID �� Time ��Ϣ������ScanLine Profile ����ɨ���ߣ��������·�棬����Ч���е㿰��
 			pointCloud.points.push_back(pt);
 		}
-	
+
 		return 1;
 	}
-	
-	// bool DataIo::readLasFile(const std::string &fileName, pcl::PointCloud<pcl::PointXYZI> &pointCloud, vector<double> & boundingbox,double & X_min,double & Y_min)
-	bool DataIo::readLasFile(const std::string &fileName, pcl::PointCloud<pcl::PointXYZI> &pointCloud, Bounds & bound_3d)
+	bool DataIo::readLasFile(const std::string &fileName, pcl::PointCloud<pcl::PointXYZI> &pointCloud, Bounds &bound_3d)
 	{
 		if (fileName.substr(fileName.rfind('.')).compare(".las"))
 		{
 			return 0;
 		}
-	
+
 		std::ifstream ifs;
 		ifs.open(fileName, std::ios::in | std::ios::binary);
 		if (ifs.bad())
 		{
-			cout << "δ����ƥ����" << endl;
+			cout << "Failed" << endl;
 		}
 		liblas::ReaderFactory f;
 		liblas::Reader reader = f.CreateWithStream(ifs);
-		liblas::Header const& header = reader.GetHeader();
-		
-		//header�����ֱ����bounding box ����
-		double Xmin, Ymin, Zmin, Xmax, Ymax,Zmax;
+		liblas::Header const &header = reader.GetHeader();
+		double Xmin, Ymin, Zmin, Xmax, Ymax, Zmax;
 		Xmin = header.GetMinX();
 		Ymin = header.GetMinY();
 		Zmin = header.GetMinZ();
@@ -2312,35 +1729,35 @@ namespace roadmarking
 		Ymax = header.GetMaxY();
 		Zmax = header.GetMaxZ();
 
-		bound_3d.min_x = Xmin;bound_3d.min_y = Ymin;bound_3d.min_z = Zmin;
-		bound_3d.max_x = Xmax;bound_3d.max_y = Ymax;bound_3d.max_z = Zmax;
+		bound_3d.min_x = Xmin;
+		bound_3d.min_y = Ymin;
+		bound_3d.min_z = Zmin;
+		bound_3d.max_x = Xmax;
+		bound_3d.max_y = Ymax;
+		bound_3d.max_z = Zmax;
 
-	    float center_x = bound_3d.min_x / 2.0f + bound_3d.max_x / 2.0f;
-	    float center_y = bound_3d.min_y / 2.0f + bound_3d.max_y / 2.0f;
-	    float center_z = bound_3d.min_z / 2.0f + bound_3d.max_z / 2.0f;
-	
-		/*whileѭ���б������еĵ�;*/
+		float center_x = bound_3d.min_x / 2.0f + bound_3d.max_x / 2.0f;
+		float center_y = bound_3d.min_y / 2.0f + bound_3d.max_y / 2.0f;
+		float center_z = bound_3d.min_z / 2.0f + bound_3d.max_z / 2.0f;
+
 		while (reader.ReadNextPoint())
 		{
-			const liblas::Point& p = reader.GetPoint();
+			const liblas::Point &p = reader.GetPoint();
 			//i++;
-			pcl::PointXYZI  pt;
-			/*�����Ļ���������ǿ��ֵ��ֵ��PCL�еĵ�;*/
-			/*��һ��ƽ�ƣ�������WGS84 �µĵ�����̫���ˣ�����ɾ�����ʧ�� ��Ϊlas�Ķ�ȡ��������double�ģ���pcd��int��*/
-			pt.x = p.GetX()-center_x;
-			pt.y = p.GetY()-center_y;  
+			pcl::PointXYZI pt;
+			
+			pt.x = p.GetX() - center_x;
+			pt.y = p.GetY() - center_y;
 			pt.z = p.GetZ();
 			pt.intensity = p.GetIntensity();
 
-			// print intentisy every 1 000 000
-			//if (i % 1000000 == 0) { cout << pt.intensity << endl; } //��ЩPointSourceID �� Time ��Ϣ������ScanLine Profile ����ɨ���ߣ��������·�棬����Ч���е㿰��
 			pointCloud.points.push_back(pt);
 		}
 
 		return 1;
 	}
 
-	void DataIo::getCloudBound(const pcXYZIPtr &cloud, Bounds & bound)
+	void DataIo::getCloudBound(const pcXYZIPtr &cloud, Bounds &bound)
 	{
 		double min_x = cloud->points[0].x;
 		double min_y = cloud->points[0].y;
@@ -2351,7 +1768,6 @@ namespace roadmarking
 
 		for (int i = 0; i < cloud->size(); i++)
 		{
-			//��ȡ�߽�
 			if (min_x > cloud->points[i].x)
 				min_x = cloud->points[i].x;
 			if (min_y > cloud->points[i].y)
@@ -2373,7 +1789,7 @@ namespace roadmarking
 		bound.max_z = max_z;
 	}
 
-		bool DataIo::GetBoundaryOfPointCloud(pcl::PointCloud<pcl::PointXYZI> &pointCloud, Bounds &bound)
+	bool DataIo::GetBoundaryOfPointCloud(pcl::PointCloud<pcl::PointXYZI> &pointCloud, Bounds &bound)
 	{
 		if (pointCloud.points.empty())
 		{
@@ -2390,7 +1806,6 @@ namespace roadmarking
 
 			for (int i = 0; i < pointCloud.points.size(); i++)
 			{
-				//��ȡ�߽�
 				if (min_x > pointCloud.points[i].x)
 					min_x = pointCloud.points[i].x;
 				if (min_y > pointCloud.points[i].y)
@@ -2414,7 +1829,6 @@ namespace roadmarking
 		return 1;
 	}
 
-
 	bool DataIo::GetBoundaryOfPointCloud(pcl::PointCloud<pcl::PointXYZRGB> &pointCloud, Bounds &bound)
 
 	{
@@ -2433,7 +1847,6 @@ namespace roadmarking
 
 			for (int i = 0; i < pointCloud.points.size(); i++)
 			{
-				//��ȡ�߽�
 				if (min_x > pointCloud.points[i].x)
 					min_x = pointCloud.points[i].x;
 				if (min_y > pointCloud.points[i].y)
@@ -2454,6 +1867,129 @@ namespace roadmarking
 			bound.min_z = min_z;
 			bound.max_z = max_z;
 		}
+		return 1;
+	}
+
+	bool DataIo::writeRoadmarkingShpWithOffset(const std::string &base_folder_name,
+											   RoadMarkings &roadmarkings, int file_index,
+											   float d_x, float d_y)
+	{
+#if 0 // require GDAL
+		// string outputFolder = base_folder_name + "\\Vectorized Road Markings (shp)"; // Windows
+		string outputFolder = base_folder_name + "/Vectorized Road Markings (shp)"; // Ubuntu
+
+		if (!boost::filesystem::exists(outputFolder))
+		{
+			boost::filesystem::create_directory(outputFolder);
+		}
+
+		std::string filename;
+		ostringstream oss;
+		oss << "/Vectorized Road Markings_" << file_index << ".shp";
+		filename = outputFolder + oss.str();
+
+		const char *pszDriverName = "ESRI Shapefile";
+		GDALAllRegister();
+		OGRRegisterAll();
+		CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", "NO");
+
+		OGRSFDriver* poDriver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName(pszDriverName);
+		//GDALDriver* poDriver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName(pszDriverName);
+
+		if (poDriver == NULL) {
+			std::cout << "ESRI Shapefile : This driver is not available!" << std::endl;
+			//exit(1);
+		}
+
+		if ((_access(filename.c_str(), 0)) != -1) {
+			std::cout << "Exist this shp file." << std::endl;
+			remove(filename.c_str());
+		}
+
+		OGRDataSource *poDS;
+		//GDALDataset *poDS;
+
+		poDS = poDriver->CreateDataSource(filename.c_str(), NULL);
+		//poDS = poDriver->Create(filename.c_str(), 0, 0, 0, GDT_Unknown, NULL);
+
+		if (poDS == NULL) {
+			std::cout << "Failed in creating Dataset" << std::endl;
+			//exit(1);
+		}
+		else
+			std::cout << "Creating dataset done" << std::endl;
+
+		//// create layers:
+		OGRLayer *poLayer;
+		poLayer = poDS->CreateLayer("roadmarking", NULL, wkbMultiLineString25D, NULL);
+		if (poLayer == NULL) {
+			std::cout << "Layer creation failed!" << std::endl;
+			exit(1);
+		}
+		else
+			std::cout << "Creating layer done" << std::endl;
+
+		// create the attributes tables:
+		OGRFieldDefn poFieldID("ID", OFTInteger);
+		poFieldID.SetWidth(40);
+
+		OGRFieldDefn poFieldType("Type", OFTInteger);
+		poFieldID.SetWidth(40);
+
+		if (poLayer->CreateField(&poFieldID) != OGRERR_NONE) {
+			std::cout << "ID field creation failed!" << std::endl;
+			exit(1);
+		}
+		if (poLayer->CreateField(&poFieldType) != OGRERR_NONE) {
+			std::cout << "Type field creation failed!" << std::endl;
+			exit(1);
+		}
+
+		// create lines
+		int line_N = roadmarkings.size();
+
+		for (int i = 0; i < line_N; ++i) {
+
+			if (roadmarkings[i].category > 0 && roadmarkings[i].polyline.size() > 1)
+			{
+				//cout << "Output vector " << i << " begin \n";
+				int pt_N = roadmarkings[i].polyline.size();
+
+				OGRFeature *poFeature;
+				poFeature = OGRFeature::CreateFeature(poLayer->GetLayerDefn());
+				poFeature->SetField("ID", i);
+				poFeature->SetField("Type", roadmarkings[i].category);
+				//OGRwkbGeometryType temp_line(wkbLineString25D);
+
+				OGRLineString line;
+				for (int j = 0; j < pt_N; ++j)
+				{
+					line.addPoint(roadmarkings[i].polyline[j].x + d_x,
+						roadmarkings[i].polyline[j].y + d_y,
+						roadmarkings[i].polyline[j].z );
+				}
+				if (roadmarkings[i].category > 1)
+					line.addPoint(roadmarkings[i].polyline[0].x + d_x,
+						roadmarkings[i].polyline[0].y + d_y,
+						roadmarkings[i].polyline[0].z); // close the polyline
+
+				poFeature->SetGeometry(&line);
+
+				if (poLayer->CreateFeature(poFeature) != OGRERR_NONE) {
+					std::cout << "Failed to create feature in shapefile." << std::endl;
+				}
+				OGRFeature::DestroyFeature(poFeature);
+
+				//cout << "Output vector " << i << " done \n";
+			}
+		}
+
+		OGRDataSource::DestroyDataSource(poDS);
+
+		cout << "Output vectorized roadmarking done \n";
+
+#endif
+
 		return 1;
 	}
 
@@ -2678,6 +2214,5 @@ namespace roadmarking
 	// 	cout << "Output Classified Road Markings Point Cloud Done" << endl;
 	// 	return true;
 	// }
-# endif
-
+#endif
 }

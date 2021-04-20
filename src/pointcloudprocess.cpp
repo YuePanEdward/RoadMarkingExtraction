@@ -14,20 +14,12 @@
 #include <pcl/surface/concave_hull.h>  
 #include <pcl/kdtree/kdtree_flann.h>
 #include <pcl/filters/project_inliers.h>
-//#include <pcl/visualization/common/common.h>
-//#include <pcl/visualization/pcl_visualizer.h>
 
-//hyj
-#include <liblas/liblas.hpp>
-#include <liblas/version.hpp>
-#include <liblas/point.hpp>
-//#include <intsafe.h>
 #include <set>
 #include <unordered_set>
 #include <algorithm>
 
 #include "utility.h"
-#include "k_means.h"
 
 using namespace std;
 
@@ -94,7 +86,7 @@ namespace roadmarking
 	{
 		for (int i = 0; i < inclouds.size(); i++)
 		{
-			if (inclouds[i].size() > K)  // Ҫ���� �ܵ�������K���Ž�������ӵ���
+			if (inclouds[i].size() > K)
 			{
 				outclouds.push_back(inclouds[i]);
 			}
@@ -108,8 +100,8 @@ namespace roadmarking
 		pcl::StatisticalOutlierRemoval<pcl::PointXYZI> sor;
 
 		sor.setInputCloud(incloud.makeShared());
-		sor.setMeanK(MeanK);//50
-		sor.setStddevMulThresh(std);//1.0
+		sor.setMeanK(MeanK);//example 50
+		sor.setStddevMulThresh(std);//exampel 1.0
 		sor.filter(outcloud);
 
 	}
@@ -133,7 +125,7 @@ namespace roadmarking
 			intensitylist.resize(pointnumber);
 			for (int j = 0; j < pointnumber; j++)
 			{
-				intensitylist[j] = inclouds[i].points[j].intensity;   //vector ����Ѿ�������ڴ�Ͳ���push_back�ˣ�
+				intensitylist[j] = inclouds[i].points[j].intensity;   
 			}
 			int intensitymax, intensitymin;
 			intensitymax = *(max_element(intensitylist.begin(), intensitylist.end()));
@@ -155,8 +147,6 @@ namespace roadmarking
 				int bin = (N - 1) * intensitylist[j] / intensitymax;
 				h0[bin]++;
 			}
-
-			//��ȡ����ֱ��ͼ
 			for (int k = 0; k < N; k++)
 			{
 				h[k] = (float)h0[k] / pointnumber;
@@ -171,28 +161,23 @@ namespace roadmarking
 
 				for (int t = 0; t < N; t++)
 				{
-					if (t <= k) //��������  
+					if (t <= k)
 					{
-						//��iΪ��ֵ���࣬��һ���ܵĸ���  
 						w0 += h[t];
 						u0tmp += t * h[t];
 					}
-					else       //ǰ������  
+					else     
 					{
-						//��iΪ��ֵ���࣬�ڶ����ܵĸ���  
 						w1 += h[t];
 						u1tmp += t * h[t];
 					}
 				}
+				u0 = u0tmp / w0;       
+				u1 = u1tmp / w1;     
+				u = u0tmp + u1tmp;    
 
-				u0 = u0tmp / w0;        //��һ���ƽ���Ҷ�  
-				u1 = u1tmp / w1;        //�ڶ����ƽ���Ҷ�  
-				u = u0tmp + u1tmp;      //����ͼ���ƽ���Ҷ�  
-
-				//������䷽��  
 				deltaTmp = w0 * (u0 - u)*(u0 - u) + w1 * (u1 - u)*(u1 - u);
 
-				//�ҳ������䷽���Լ���Ӧ����ֵ  
 				if (deltaTmp > deltaMax)
 				{
 					deltaMax = deltaTmp;
@@ -201,8 +186,6 @@ namespace roadmarking
 			}
 
 			//cout << "Threshold : "<<threshold<< endl;
-
-			//���ݸ���ֵ���е��Ʒָ�
 			for (int j = 0; j < pointnumber; j++)
 			{
 				int bin = (N - 1) * intensitylist[j] / intensitymax;
@@ -260,14 +243,11 @@ namespace roadmarking
 					min_y_j = j;
 				}
 
-			}
-			//˳�� minx,miny,maxx,maxy  
+			} 
 			boundingdatas[i].push_back(clouds[i].points[min_x_j]);
 			boundingdatas[i].push_back(clouds[i].points[min_y_j]);
 			boundingdatas[i].push_back(clouds[i].points[max_x_j]);
 			boundingdatas[i].push_back(clouds[i].points[max_y_j]);
-
-			//����һ���ı���·�꣬ʸ�������� minx,miny,maxx,maxy ���ĸ��� 
 		}
 
 	}
@@ -280,12 +260,11 @@ namespace roadmarking
 #pragma omp parallel for private(i) //Multi-thread
 		for (i = 0; i < boundingdatas.size(); i++)
 		{
-			// minx,miny,maxx,maxy �ĸ��� �ֱ��Ϊ A��B��C��D
-			double Ax, Ay, Bx, By, Cx, Cy, Dx, Dy; //������
-			double AB, BC, CD, DA, AC, BD;  //6���߳�
-			double ACpmBD;   //�Խ����������
-			double cornerrad; //�Խ��߼нǣ������ƣ�
-			//��¼������
+			double Ax, Ay, Bx, By, Cx, Cy, Dx, Dy; 
+			double AB, BC, CD, DA, AC, BD; 
+			double ACpmBD;  
+			double cornerrad;
+
 			Ax = boundingdatas[i][0].x;
 			Bx = boundingdatas[i][1].x;
 			Cx = boundingdatas[i][2].x;
@@ -295,7 +274,6 @@ namespace roadmarking
 			Cy = boundingdatas[i][2].y;
 			Dy = boundingdatas[i][3].y;
 
-			// ����߳� 
 			AB = sqrt((Ax - Bx)*(Ax - Bx) + (Ay - By)*(Ay - By));
 			BC = sqrt((Bx - Cx)*(Bx - Cx) + (By - Cy)*(By - Cy));
 			CD = sqrt((Cx - Dx)*(Cx - Dx) + (Cy - Dy)*(Cy - Dy));
@@ -303,17 +281,17 @@ namespace roadmarking
 			AC = sqrt((Ax - Cx)*(Ax - Cx) + (Ay - Cy)*(Ay - Cy));
 			BD = sqrt((Bx - Dx)*(Bx - Dx) + (By - Dy)*(By - Dy));
 
-			//����Խ����������
-			ACpmBD = abs((Ax - Cx)*(Bx - Dx) + (Ay - Cy)*(By - Dy)); //ȡ������ֵ��������Ǽн�
+		
+			ACpmBD = abs((Ax - Cx)*(Bx - Dx) + (Ay - Cy)*(By - Dy)); 
 
-			cornerrad = acos(ACpmBD / AC / BD); //�����Ƽн�
-			boundingfeatures[i].corner = cornerrad / pi * 180; //�Ƕ��Ƽн�
+			cornerrad = acos(ACpmBD / AC / BD); 
+			boundingfeatures[i].corner = cornerrad / pi * 180; 
 			boundingfeatures[i].sortingEdges.push_back(AB);
 			boundingfeatures[i].sortingEdges.push_back(BC);
 			boundingfeatures[i].sortingEdges.push_back(CD);
 			boundingfeatures[i].sortingEdges.push_back(DA);
 
-			sort(boundingfeatures[i].sortingEdges.begin(), boundingfeatures[i].sortingEdges.end()); //Ĭ����������
+			sort(boundingfeatures[i].sortingEdges.begin(), boundingfeatures[i].sortingEdges.end()); 
 		}
 
 	}
@@ -322,35 +300,32 @@ namespace roadmarking
 	{
 		roadmarkings.resize(boundingfeatures.size());
 
-		//������ֵ�趨
+
 		double angt1, angt2, lt1, lt2, lt3, lt4, lt5, ratio1, ratio2;
-		//Bounding�ĵ��� �Խ��߼н�
+
 		angt1 = 1.25;
 		angt2 = 30;
-		//Bounding�ĵ��� �߳�
+
 		lt1 = 0.04;
 		lt2 = 0.6;
 		lt3 = 3.0;
 		lt4 = 8.5;
 		lt5 = 0.35;
-		//Bounding�ĵ��� �߳���ֵ
+	
 		ratio1 = 1.3;
 		ratio2 = 1.45;
-		//��������֪ʶ��ÿ��Bounding�ĵ�������жϣ�����
 		for (int i = 0; i < boundingfeatures.size(); i++)
 		{
 			bool rough_classified = false;
-			//��취���£����в��һ��
 
 			if (/*boundingfeatures[i].corner < angt1
 				&& */boundingfeatures[i].sortingEdges[3] > lt4 && boundingfeatures[i].sortingEdges[2] > lt4
 				&& boundingfeatures[i].sortingEdges[1] < lt5 && boundingfeatures[i].sortingEdges[0] < lt5
 				&& boundingfeatures[i].sortingEdges[3] / boundingfeatures[i].sortingEdges[2] < ratio2)
 			{
-				roadmarkings[i].category = 1;   // 1 �� ���ͳ�����
+				roadmarkings[i].category = 1;  
 				rough_classified = true;
 			}
-			//���Ҳ��ģ��ƥ������
 
 			if (boundingfeatures[i].corner > angt1 && boundingfeatures[i].corner < angt2
 				&& boundingfeatures[i].sortingEdges[3]<lt4 && boundingfeatures[i].sortingEdges[3]>lt3
@@ -360,7 +335,7 @@ namespace roadmarking
 				&& boundingfeatures[i].sortingEdges[3] / boundingfeatures[i].sortingEdges[2] < ratio1
 				&& boundingfeatures[i].sortingEdges[1] / boundingfeatures[i].sortingEdges[0] < ratio1)
 			{
-				roadmarkings[i].category = 2;   // 2 �� �����ι������
+				roadmarkings[i].category = 2;  
 				rough_classified = true;
 			}
 			if (rough_classified)
@@ -375,9 +350,7 @@ namespace roadmarking
 	{
 		roadmarkings.resize(boundingfeatures.size());
 
-		//������ֵ�趨
 		double angt1, angt2, angt3, angt4, angt5, lt1, lt2, lt3, lt4, lt5, lt6, lt7, lt8, ratio1, ratio2;
-		//Bounding�ĵ��� �Խ��߼н�
 		angt1 = 2.0;
 		angt2 = 50.0;
 
@@ -386,7 +359,6 @@ namespace roadmarking
 
 		angt5 = 5.5;
 
-		//Bounding�ĵ��� �߳�
 		lt1 = 0.05;
 		lt2 = 0.55;
 		lt3 = 0.8;
@@ -396,24 +368,20 @@ namespace roadmarking
 		lt7 = 2.2;
 		lt8 = 1.0;
 
-		//Bounding�ĵ��� �߳���ֵ
 		ratio1 = 2.0;
 		ratio2 = 1.3;
 
-		//��������֪ʶ��ÿ��Bounding�ĵ�������жϣ�����
 		for (int i = 0; i < boundingfeatures.size(); i++)
 		{
 			bool rough_classified = false;
-			//��취���£����в��һ��
 			if (boundingfeatures[i].corner < angt5 &&
 				boundingfeatures[i].sortingEdges[3] > lt6 && boundingfeatures[i].sortingEdges[2] > lt6
 				&& (boundingfeatures[i].sortingEdges[1] < lt5 || boundingfeatures[i].sortingEdges[0] < lt5)
 				&& boundingfeatures[i].sortingEdges[3] / boundingfeatures[i].sortingEdges[2] < ratio2)
 			{
-				roadmarkings[i].category = 1;   // 1 �� ���ͳ�����
+				roadmarkings[i].category = 1;  
 				rough_classified = true;
 			}
-			//���Ҳ��ģ��ƥ������
 
 			if (boundingfeatures[i].corner > angt1 && boundingfeatures[i].corner < angt2
 				&& boundingfeatures[i].sortingEdges[3]<lt4 && boundingfeatures[i].sortingEdges[3]>lt3
@@ -423,7 +391,7 @@ namespace roadmarking
 				&& boundingfeatures[i].sortingEdges[3] / boundingfeatures[i].sortingEdges[2] < ratio1
 				&& boundingfeatures[i].sortingEdges[1] / boundingfeatures[i].sortingEdges[0] < ratio1)
 			{
-				roadmarkings[i].category = 2;   // 2 �� �����ι������
+				roadmarkings[i].category = 2;  
 				rough_classified = true;
 			}
 
@@ -433,7 +401,7 @@ namespace roadmarking
 				&& boundingfeatures[i].sortingEdges[1]>lt8 && boundingfeatures[i].sortingEdges[1] < lt7
 				&& boundingfeatures[i].sortingEdges[0]>lt8 && boundingfeatures[i].sortingEdges[0] < lt7)
 			{
-				roadmarkings[i].category = 8;   // 8 �� ������ʾ���ٱ���
+				roadmarkings[i].category = 8;  
 				rough_classified = true;
 			}
 			if (rough_classified)
@@ -448,7 +416,7 @@ namespace roadmarking
 		for (int j = 0; j < sideline_number; j++)
 		{
 			if (line_used[j] == false && tail_index != j && d_tail_head[tail_index][j] < combine_length) {
-				combineline.push_back(j); //������
+				combineline.push_back(j); 
 				line_used[j] = true;
 				Find_tail2head(j, d_tail_head, line_used, combineline, combine_length);
 				break;
@@ -462,7 +430,7 @@ namespace roadmarking
 		for (int j = 0; j < sideline_number; j++)
 		{
 			if (line_used[j] == false && head_index != j && d_head_tail[head_index][j] < combine_length) {
-				combineline.insert(combineline.begin(), j); // ����ǰ���;
+				combineline.insert(combineline.begin(), j); 
 				line_used[j] = true;
 				Find_head2tail(j, d_head_tail, line_used, combineline, combine_length);
 				break;
@@ -475,8 +443,6 @@ namespace roadmarking
 	{
 		vector<pair<pcl::PointXYZI, pcl::PointXYZI>> sidelines;
 		vector<int> sidelines_index_in_roadmarkings;
-
-		//Sidelines �� ��㣬�յ�;
 		for (int i = 0; i < roadmarkings.size(); i++)
 		{
 			if (roadmarkings[i].category == 1)
@@ -495,7 +461,6 @@ namespace roadmarking
 		vector<vector<double>> D_tail_head(sideline_number, vector<double>(sideline_number));
 		vector<vector<double>> D_head_tail(sideline_number, vector<double>(sideline_number));
 
-		//��㵽�յ㣬�յ㵽������� ����;
 		for (int i = 0; i < sideline_number; i++)
 		{
 			for (int j = 0; j < sideline_number; j++)
@@ -511,12 +476,10 @@ namespace roadmarking
 			}
 		}
 
-		vector<vector<int>> Combinelines; //�ϲ����߼�;
-		vector<bool> Line_used(sideline_number);   //�Ƿ��Ѵ���; 
+		vector<vector<int>> Combinelines; 
+		vector<bool> Line_used(sideline_number);  
 
-		for (int i = 0; i < sideline_number; i++) Line_used[i] = false;  //��ʼ��Ϊfalse
-
-		// �ݹ��ҿ��ܵĶ��ߣ��Ծ���Combine_length��Ϊ�ж�����;
+		for (int i = 0; i < sideline_number; i++) Line_used[i] = false;  
 		for (int i = 0; i < sideline_number; i++)
 		{
 			if (Line_used[i] == false) {
@@ -524,8 +487,8 @@ namespace roadmarking
 				Combineline.push_back(i);
 				Line_used[i] = true;
 
-				Find_tail2head(i, D_tail_head, Line_used, Combineline, Combine_length);// �ݹ�������;
-				Find_head2tail(i, D_head_tail, Line_used, Combineline, Combine_length);// �ݹ���ǰ��;
+				Find_tail2head(i, D_tail_head, Line_used, Combineline, Combine_length);
+				Find_head2tail(i, D_head_tail, Line_used, Combineline, Combine_length);
 
 				Combinelines.push_back(Combineline);
 			}
@@ -533,10 +496,6 @@ namespace roadmarking
 
 		combine_sideline_markings.resize(Combinelines.size());
 
-		//cout << "Side Line Number after Combination: " << Combinelines.size() << endl;
-
-
-		//�������л�;
 		for (int i = 0; i < Combinelines.size(); i++)
 		{
 			for (int j = 0; j < Combinelines[i].size(); j++) {
@@ -564,14 +523,13 @@ namespace roadmarking
 	}
 
 	void Csegmentation::MarkingVectorization_highway(const vector<pcXYZI> &clouds, const vector<vector<pcl::PointXYZI>> &boundingdatas,
-		RoadMarkings & roadmarkings, double line_sample_dl, double ambiguousRatio)//ģ����������
+		RoadMarkings & roadmarkings, double line_sample_dl, double ambiguousRatio)
 	{
-
         vector<int> categorynumber;
-		vector<double> Xlist; //����������X���� //For �ڶ��೤����
+		vector<double> Xlist; 
 		const double pi = 3.1415926;
 
-		categorynumber.resize(10);  //����10��
+		categorynumber.resize(10); 
 		for (int m = 0; m < 10; m++)
 		{
 			categorynumber[m] = 0;
@@ -583,7 +541,7 @@ namespace roadmarking
 
 			switch (roadmarkings[i].category)
 			{
-			case 1: //1�� ���ͳ�����
+			case 1:
 			{
 				categorynumber[1]++;
 
@@ -597,19 +555,19 @@ namespace roadmarking
 				dX = Xmax - Xmin;
 				dY = Ymax - Ymin;
 
-				double deltaX;  //������X���;
+				double deltaX; 
 				double sampleK_d;
-				int sampleK; //��������;
+				int sampleK;
 
-				deltaX = 0.75 * line_sample_dl*dX / sqrt(dX*dX + dY * dY);    //һ���line_sample����;
+				deltaX = 0.75 * line_sample_dl*dX / sqrt(dX*dX + dY * dY);    
 				sampleK_d = dX / deltaX;
 				sampleK = sampleK_d;
 
 				//cout << "Cloud  " << i << "  Sample number: " << sampleK<<endl;
 
 				roadmarkings[i].polyline.resize(sampleK + 2);
-				roadmarkings[i].polyline[0] = boundingdatas[i][0]; //���ﲻ����ȷ����ȡ0��1��ƽ����
-				roadmarkings[i].polyline[sampleK + 1] = boundingdatas[i][3]; //���ﲻ����ȷ����ȡ2��3��ƽ����
+				roadmarkings[i].polyline[0] = boundingdatas[i][0];
+				roadmarkings[i].polyline[sampleK + 1] = boundingdatas[i][3]; 
 
 
 				for (int k = 1; k <= sampleK; k++) {
@@ -625,8 +583,8 @@ namespace roadmarking
 						{
 							double this_k_d = (Xlist[k] - Xmin + 0.001) / deltaX;
 							int this_k = this_k_d;
-							roadmarkings[i].polyline[this_k] = clouds[i].points[j]; //��Ϊ������
-							Xlist.erase(iter); // Xlist��ɾ����λ��
+							roadmarkings[i].polyline[this_k] = clouds[i].points[j]; 
+							Xlist.erase(iter); 
 							break;
 						}
 						iter++;
@@ -640,7 +598,7 @@ namespace roadmarking
 
 				break;
 			}
-			case 2: //2 �� �����ι������
+			case 2: 
 			{
 				categorynumber[2]++;
 
@@ -653,8 +611,6 @@ namespace roadmarking
 			case 3: //3 forward arrow (ready)
 			{
 				categorynumber[3]++;
-				//��һ����Ե���ϡ��ֱ��������Ϊalpha-shape֮��ֱ�Ӿ���˳�����е�;
-
 				pcXYZPtr forward_arrow_points(new pcXYZ());
 				pt_temp = pcl::PointXYZ(-0.225, -4.5, 0.0);
 				forward_arrow_points->points.push_back(pt_temp);
@@ -677,16 +633,13 @@ namespace roadmarking
 
 				for (int j = 0; j < 7; j++)
 				{
-					//˳ʱ��ת��theta 
 					roadmarkings[i].polyline[j].x = forward_arrow_points->points[j].x;
 					roadmarkings[i].polyline[j].y = forward_arrow_points->points[j].y;
 					roadmarkings[i].polyline[j].z = forward_arrow_points->points[j].z;
 				}
-
-
                 /*
 				theta=arctan((XA-XB)/(YA-YB))
-				XA-XB     YA-YB      theta'(˳ʱ��ת��
+				XA-XB     YA-YB      theta
 				>0        >0         theta
 				>0        <0         180+theta
 				<0        <0         180+theta
@@ -694,11 +647,6 @@ namespace roadmarking
 				X=cos(theta)*X' -sin(theta)*Y'+XB
 				Y=sin(theta)*X' +cos(theta)*Y'+YB
 				*/
-
-				// just select the points on the model.
-
-				// another solution is to translate the model to 0,0,0 then just use the model parameter and then all is fine
-
 				break;
 			}
 			case 4: //4 forward right arrow (ready)
@@ -741,16 +689,12 @@ namespace roadmarking
 
 				for (int j = 0; j < 14; j++)
 				{
-					//˳ʱ��ת��theta 
 					roadmarkings[i].polyline[j].x = forward_right_arrow_points->points[j].x;
 					roadmarkings[i].polyline[j].y = forward_right_arrow_points->points[j].y;
 					roadmarkings[i].polyline[j].z = forward_right_arrow_points->points[j].z;
 				}
 
-				//��������¼ģ�͵�λ��ȷ�����������ù�񻯲�������ʸ��ͼ; 
 				/*
-				��֪XA,YA;XB,YB  ��ע�ⶼ�ǲ������ϵ�µġ�
-				˳ʱ��˳��
 				ID     X'       Y'
 				0      0        6
 				1    -0.45     3.6
@@ -767,7 +711,7 @@ namespace roadmarking
 				12    0.15     3.6
 				13    0.45     3.6
 				theta=arctan((XA-XB)/(YA-YB))
-				XA-XB     YA-YB      theta'(˳ʱ��ת��
+				XA-XB     YA-YB      theta
 				>0        >0         theta
 				>0        <0         180+theta
 				<0        <0         180+theta
@@ -778,7 +722,7 @@ namespace roadmarking
 
 				break;
 			}
-			case 5: //5�� ���Ҽ�ͷ
+			case 5: 
 			{
 				categorynumber[5]++;
 
@@ -808,39 +752,13 @@ namespace roadmarking
 
 				for (int j = 0; j < 9; j++)
 				{
-					//˳ʱ��ת��theta 
 					roadmarkings[i].polyline[j].x = right_arrow_points->points[j].x;
 					roadmarkings[i].polyline[j].y = right_arrow_points->points[j].y;
 					roadmarkings[i].polyline[j].z = right_arrow_points->points[j].z;
 				}
-
-				//��������¼ģ�͵�λ��ȷ�����������ù�񻯲�������ʸ��ͼ; 
-				/*
-				��֪XA,YA;XB,YB  ��ע�ⶼ�ǲ������ϵ�µġ�
-				˳ʱ��˳��
-				ID     X'       Y'
-				0    -0.95      6
-				1    -1.35     4.4
-				2    -0.95     2.9
-				3    -0.95     3.8
-				4    -0.15     3
-				5    -0.15     0
-				6     0.15     0
-				7     0.15     3.9
-				8    -0.95     5.0
-				theta=arctan((XA-XB)/(YA-YB))
-				XA-XB     YA-YB      theta'(˳ʱ��ת��
-				>0        >0         theta
-				>0        <0         180+theta
-				<0        <0         180+theta
-				<0        >0         360+theta
-				X=cos(theta)*X' -sin(theta)*Y'+XB
-				Y=sin(theta)*X' +cos(theta)*Y'+YB
-				*/
-
 				break;
 			}
-			case 6: //6 �� ��ͷ��ͷ
+			case 6: //6
 			{
 				categorynumber[6]++;
 
@@ -848,7 +766,7 @@ namespace roadmarking
 
 				break;
 			}
-			case 8: //8 �� �������α���
+			case 8: //8 
 			{
 				categorynumber[8]++;
 				roadmarkings[i].polyline.push_back(boundingdatas[i][0]);
@@ -874,14 +792,14 @@ namespace roadmarking
 
 	void Csegmentation::MarkingVectorization_cityroad(const vector<pcXYZI> &clouds,
 		const vector<vector<pcl::PointXYZI>> &boundingdatas,
-		RoadMarkings & roadmarkings, double line_sample_dl, double ambiguousRatio)//ģ����������
+		RoadMarkings & roadmarkings, double line_sample_dl, double ambiguousRatio)
 	{
 
 		vector<int> categorynumber;
-		vector<double> Xlist; //����������X���� //For �ڶ��೤����
+		vector<double> Xlist; 
 		const double pi = 3.1415926;
 
-		categorynumber.resize(10);  //����10��
+		categorynumber.resize(10); 
 		for (int m = 0; m < 10; m++)
 		{
 			categorynumber[m] = 0;
@@ -893,7 +811,7 @@ namespace roadmarking
 
 			switch (roadmarkings[i].category)
 			{
-			case 1: //1�� ���ͳ�����
+			case 1: 
 			{
 				categorynumber[1]++;
 
@@ -907,19 +825,19 @@ namespace roadmarking
 				dX = Xmax - Xmin;
 				dY = Ymax - Ymin;
 
-				double deltaX;  //������X���;
+				double deltaX;  
 				double sampleK_d;
-				int sampleK; //��������;
+				int sampleK; 
 
-				deltaX = 0.75 * line_sample_dl*dX / sqrt(dX*dX + dY * dY);    //һ���line_sample����;
+				deltaX = 0.75 * line_sample_dl*dX / sqrt(dX*dX + dY * dY);    
 				sampleK_d = dX / deltaX;
 				sampleK = sampleK_d;
 
 				//cout << "Cloud  " << i << "  Sample number: " << sampleK<<endl;
 
 				roadmarkings[i].polyline.resize(sampleK + 2);
-				roadmarkings[i].polyline[0] = boundingdatas[i][0]; //���ﲻ����ȷ����ȡ0��1��ƽ����
-				roadmarkings[i].polyline[sampleK + 1] = boundingdatas[i][3]; //���ﲻ����ȷ����ȡ2��3��ƽ����
+				roadmarkings[i].polyline[0] = boundingdatas[i][0]; 
+				roadmarkings[i].polyline[sampleK + 1] = boundingdatas[i][3]; 
 
 
 				for (int k = 1; k <= sampleK; k++) {
@@ -935,8 +853,8 @@ namespace roadmarking
 						{
 							double this_k_d = (Xlist[k] - Xmin + 0.001) / deltaX;
 							int this_k = this_k_d;
-							roadmarkings[i].polyline[this_k] = clouds[i].points[j]; //��Ϊ������
-							Xlist.erase(iter); // Xlist��ɾ����λ��
+							roadmarkings[i].polyline[this_k] = clouds[i].points[j]; 
+							Xlist.erase(iter); 
 							break;
 						}
 						iter++;
@@ -950,7 +868,7 @@ namespace roadmarking
 
 				break;
 			}
-			case 2: //2 �� �����ι������
+			case 2: 
 			{
 				categorynumber[2]++;
 
@@ -960,10 +878,9 @@ namespace roadmarking
 				roadmarkings[i].polyline.push_back(boundingdatas[i][3]);
 				break;
 			}
-			case 3: //3�� ��ͨ��ǰ��ͷ
+			case 3: 
 			{
 				categorynumber[3]++;
-				//��һ����Ե���ϡ��ֱ��������Ϊalpha-shape֮��ֱ�Ӿ���˳�����е�;
 
 				pcXYZPtr forward_arrow_points(new pcXYZ());
 				pt_temp = pcl::PointXYZ(-0.15, -3.0, 0.0);
@@ -987,16 +904,12 @@ namespace roadmarking
 
 				for (int j = 0; j < 7; j++)
 				{
-					//˳ʱ��ת��theta 
 					roadmarkings[i].polyline[j].x = forward_arrow_points->points[j].x;
 					roadmarkings[i].polyline[j].y = forward_arrow_points->points[j].y;
 					roadmarkings[i].polyline[j].z = forward_arrow_points->points[j].z;
 				}
 
-				//��������¼ģ�͵�λ��ȷ�����������ù�񻯲�������ʸ��ͼ; 
 				/*
-				��֪XA,YA;XB,YB  ��ע�ⶼ�ǲ������ϵ�µġ�
-				˳ʱ��˳��
 				ID     X'       Y'
 				0      0        6
 				1    -0.45     3.6
@@ -1006,7 +919,7 @@ namespace roadmarking
 				5     0.15     3.6
 				6     0.45     3.6
 				theta=arctan((XA-XB)/(YA-YB))
-				XA-XB     YA-YB      theta'(˳ʱ��ת��
+				XA-XB     YA-YB      theta
 				>0        >0         theta
 				>0        <0         180+theta
 				<0        <0         180+theta
@@ -1014,14 +927,8 @@ namespace roadmarking
 				X=cos(theta)*X' -sin(theta)*Y'+XB
 				Y=sin(theta)*X' +cos(theta)*Y'+YB
 				*/
-
-				// just select the points on the model.
-
-				// another solution is to translate the model to 0,0,0 then just use the model parameter and then all is fine
-
 				break;
-			}
-			case 4: //4�� ��ǰ���Ҽ�ͷ
+			}//4�� ��ǰ���Ҽ�ͷ
 			{
 				categorynumber[4]++;
 
@@ -1061,16 +968,12 @@ namespace roadmarking
 
 				for (int j = 0; j < 14; j++)
 				{
-					//˳ʱ��ת��theta 
 					roadmarkings[i].polyline[j].x = forward_right_arrow_points->points[j].x;
 					roadmarkings[i].polyline[j].y = forward_right_arrow_points->points[j].y;
 					roadmarkings[i].polyline[j].z = forward_right_arrow_points->points[j].z;
 				}
 
-				//��������¼ģ�͵�λ��ȷ�����������ù�񻯲�������ʸ��ͼ; 
 				/*
-				��֪XA,YA;XB,YB  ��ע�ⶼ�ǲ������ϵ�µġ�
-				˳ʱ��˳��
 				ID     X'       Y'
 				0      0        6
 				1    -0.45     3.6
@@ -1087,7 +990,7 @@ namespace roadmarking
 				12    0.15     3.6
 				13    0.45     3.6
 				theta=arctan((XA-XB)/(YA-YB))
-				XA-XB     YA-YB      theta'(˳ʱ��ת��
+				XA-XB     YA-YB      theta
 				>0        >0         theta
 				>0        <0         180+theta
 				<0        <0         180+theta
@@ -1098,7 +1001,7 @@ namespace roadmarking
 
 				break;
 			}
-			case 5: //5�� ���Ҽ�ͷ
+			case 5: 
 			{
 				categorynumber[5]++;
 
@@ -1128,16 +1031,11 @@ namespace roadmarking
 
 				for (int j = 0; j < 9; j++)
 				{
-					//˳ʱ��ת��theta 
 					roadmarkings[i].polyline[j].x = right_arrow_points->points[j].x;
 					roadmarkings[i].polyline[j].y = right_arrow_points->points[j].y;
 					roadmarkings[i].polyline[j].z = right_arrow_points->points[j].z;
 				}
-
-				//��������¼ģ�͵�λ��ȷ�����������ù�񻯲�������ʸ��ͼ; 
 				/*
-				��֪XA,YA;XB,YB  ��ע�ⶼ�ǲ������ϵ�µġ�
-				˳ʱ��˳��
 				ID     X'       Y'
 				0    -0.95      6
 				1    -1.35     4.4
@@ -1149,7 +1047,7 @@ namespace roadmarking
 				7     0.15     3.9
 				8    -0.95     5.0
 				theta=arctan((XA-XB)/(YA-YB))
-				XA-XB     YA-YB      theta'(˳ʱ��ת��
+				XA-XB     YA-YB      theta
 				>0        >0         theta
 				>0        <0         180+theta
 				<0        <0         180+theta
@@ -1160,13 +1058,17 @@ namespace roadmarking
 
 				break;
 			}
-			case 6: //6 �� ��ͷ��ͷ
+			case 6: //6  //TODO: add model
 			{
 				categorynumber[6]++;
-
 				break;
 			}
-			case 8: //8 �� �������α���
+			case 7: //7  //TODO: add model
+			{
+				categorynumber[7]++;
+				break;
+			}
+			case 8: //8 //TODO: add model
 			{
 				categorynumber[8]++;
 				roadmarkings[i].polyline.push_back(boundingdatas[i][0]);
@@ -1186,6 +1088,7 @@ namespace roadmarking
 		cout << "Arrow Road Markings (Forward and Rightward / Leftward) Number: " << categorynumber[4] << endl;
 		cout << "Arrow Road Markings (Rightward / Leftward) Number: " << categorynumber[5] << endl;
 		cout << "Arrow Road Markings (U-turn) Number: " << categorynumber[6] << endl;
+		cout << "Cross Marking Number: " << categorynumber[7] << endl;
 		cout << "Pedestrian Warning Markings Number: " << categorynumber[8] << endl;
 		*/
 	}
@@ -1216,9 +1119,9 @@ namespace roadmarking
 	pcXYZI Csegmentation::alphashape(const pcXYZI &cloud, float alpha_value) //Concave Hull Generation
 	{
 		pcXYZI cloud_hull;
-		pcl::ConcaveHull<pcl::PointXYZI> chull;        //�����������ȡ����;
-		chull.setInputCloud(cloud.makeShared());       //�����������;
-		chull.setAlpha(alpha_value);                   //0.8*resolution;
+		pcl::ConcaveHull<pcl::PointXYZI> chull;       
+		chull.setInputCloud(cloud.makeShared());       
+		chull.setAlpha(alpha_value);              
 		chull.reconstruct(cloud_hull);
 
 		//std::cout<< "Concave hull has: " << cloud_hull->points.size() << " data points." << endl;
@@ -1233,12 +1136,12 @@ namespace roadmarking
 		pcl::KdTreeFLANN <pcl::PointXYZI> kdtree;
 		kdtree.setInputCloud(boundarycloud.makeShared());
 
-		vector<int> pointIdxNKNSearch(K);   //������������
-		vector<float> pointNKNSquaredDistance(K); //ע���Ǿ���ƽ��
+		vector<int> pointIdxNKNSearch(K);   
+		vector<float> pointNKNSquaredDistance(K); 
 
 		for (int i = 0; i < boundarycloud.size(); i++) {
 
-			kdtree.nearestKSearch(boundarycloud.points[i], K, pointIdxNKNSearch, pointNKNSquaredDistance);  // K �����������
+			kdtree.nearestKSearch(boundarycloud.points[i], K, pointIdxNKNSearch, pointNKNSquaredDistance);  
 			float max1_max2;
 			max1_max2 = sqrt(pointNKNSquaredDistance[K - 1]) - sqrt(pointNKNSquaredDistance[K - 2]);
 
@@ -1249,14 +1152,14 @@ namespace roadmarking
 			Xa = boundarycloud.points[pointIdxNKNSearch[K - 1]].x;
 			Ya = boundarycloud.points[pointIdxNKNSearch[K - 1]].y;
 
-			if (max1_max2 < disthreshold)  //�����������δ����С����ֵ����Ϊ���Ǵ���ͬ�࣬������
+			if (max1_max2 < disthreshold)  
 			{
 				float maxdis = 0;
 				int maxindex = -1;
 				float Xc, Yc, Xd, Yd;
 				Xc = boundarycloud.points[pointIdxNKNSearch[K - 2]].x;
 				Yc = boundarycloud.points[pointIdxNKNSearch[K - 2]].y;
-				//��Զ����֮ǰ������е���Զ��
+				
 				for (int j = 0; j < K - 2; j++) {
 					Xd = boundarycloud.points[pointIdxNKNSearch[j]].x;
 					Yd = boundarycloud.points[pointIdxNKNSearch[j]].y;
@@ -1272,18 +1175,17 @@ namespace roadmarking
 				Yb = boundarycloud.points[pointIdxNKNSearch[maxindex]].y;
 			}
 
-			//����ֱ�ӽ���
 			else {
 				Xb = boundarycloud.points[pointIdxNKNSearch[K - 2]].x;
 				Yb = boundarycloud.points[pointIdxNKNSearch[K - 2]].y;
 			}
-			//�нǼ���
+
 			AOpBO = (Xa - Xo)*(Xb - Xo) + (Ya - Yo)*(Yb - Yo);
 			AO = sqrt((Xa - Xo)*(Xa - Xo) + (Ya - Yo)*(Ya - Yo));
 			BO = sqrt((Xb - Xo)*(Xb - Xo) + (Yb - Yo)*(Yb - Yo));
 			cosAOB = abs(AOpBO / AO / BO);
 
-			if (cosAOB < maxcos) conrnerPoints.points.push_back(boundarycloud.points[i]);  //�н�������������Ϊ�ǽǵ�
+			if (cosAOB < maxcos) conrnerPoints.points.push_back(boundarycloud.points[i]); 
 		}
 
 		return conrnerPoints;
@@ -1306,7 +1208,7 @@ namespace roadmarking
 
 			if (kdtree.radiusSearch(boundarycloud.points[i], radius, pointIdxRadiusSearch, pointRadiusSquaredDistance) > 2) {
 
-				int K = pointIdxRadiusSearch.size(); // Radius �ڵĽ��ڵ���
+				int K = pointIdxRadiusSearch.size(); 
 
 				float max1_max2;
 				max1_max2 = sqrt(pointRadiusSquaredDistance[K - 1]) - sqrt(pointRadiusSquaredDistance[K - 2]);
@@ -1318,14 +1220,13 @@ namespace roadmarking
 				Xa = boundarycloud.points[pointIdxRadiusSearch[K - 1]].x;
 				Ya = boundarycloud.points[pointIdxRadiusSearch[K - 1]].y;
 
-				if (max1_max2 < disthreshold)  //�����������δ����С����ֵ����Ϊ���Ǵ���ͬ�࣬������
+				if (max1_max2 < disthreshold)  
 				{
 					float maxdis = 0;
 					int maxindex = -1;
 					float Xc, Yc, Xd, Yd;
 					Xc = boundarycloud.points[pointIdxRadiusSearch[K - 2]].x;
 					Yc = boundarycloud.points[pointIdxRadiusSearch[K - 2]].y;
-					//��Զ����֮ǰ������е���Զ��
 					for (int j = 0; j < K - 2; j++) {
 						Xd = boundarycloud.points[pointIdxRadiusSearch[j]].x;
 						Yd = boundarycloud.points[pointIdxRadiusSearch[j]].y;
@@ -1341,18 +1242,16 @@ namespace roadmarking
 					Yb = boundarycloud.points[pointIdxRadiusSearch[maxindex]].y;
 				}
 
-				//����ֱ�ӽ���
 				else {
 					Xb = boundarycloud.points[pointIdxRadiusSearch[K - 2]].x;
 					Yb = boundarycloud.points[pointIdxRadiusSearch[K - 2]].y;
 				}
-				//�нǼ���
 				AOpBO = (Xa - Xo)*(Xb - Xo) + (Ya - Yo)*(Yb - Yo);
 				AO = sqrt((Xa - Xo)*(Xa - Xo) + (Ya - Yo)*(Ya - Yo));
 				BO = sqrt((Xb - Xo)*(Xb - Xo) + (Yb - Yo)*(Yb - Yo));
 				cosAOB = abs(AOpBO / AO / BO);
 
-				if (cosAOB < maxcos) conrnerPoints.points.push_back(boundarycloud.points[i]);  //�н�������������Ϊ�ǽǵ�
+				if (cosAOB < maxcos) conrnerPoints.points.push_back(boundarycloud.points[i]);  
 			}
 		}
 
@@ -1362,14 +1261,6 @@ namespace roadmarking
 
 	void Csegmentation::CornerExtraction(const vector<pcXYZI> &boundaryclouds, vector<pcXYZI> &corners, bool UseRadius, int K, float radius, float dis_threshold, float maxcos)
 	{
-		// �����Ƚ϶� ����һ��
-		// bool UseRadius                ����ʲô�����������ڣ�1. һ�������� (radius)  0. KNN
-		// int K                         KNN�еĵ���
-		// radius                        Radius�����е������뾶
-		// dis_threshold                 ͬ����жϾ�����ֵ �����Ǻܿ�ѧ���� 0.1
-		// maxcos                        �н�������ֵ   0.94
-
-		//vector<pcXYZI> corners;
 		corners.resize(boundaryclouds.size());
 
 
@@ -1377,60 +1268,47 @@ namespace roadmarking
 			for (int i = 0; i < corners.size(); i++)
 			{
 				corners[i] = CornerpointRadius(boundaryclouds[i], radius, dis_threshold, maxcos);
-				/*if (corners[i].size() < 20 && corners[i].size() > 5) {
-					cornerclouds.push_back(CornerClusteringKMeans(corners[i], 5));
-				}// �ж��Ǽ�ͷ����KMeans����*/
 			}
 		}
 		else {
 			for (int i = 0; i < corners.size(); i++)
-			{
-				corners[i] = CornerpointKNN(boundaryclouds[i], K, dis_threshold, maxcos);
-				/*if (corners[i].size() < 20 && corners[i].size() > 5) {
-					cornerclouds.push_back(CornerClusteringKMeans(corners[i], 5));
-				}// �ж��Ǽ�ͷ����KMeans����*/
-			}
+				corners[i] = CornerpointKNN(boundaryclouds[i], K, dis_threshold, maxcos);	
 		}
-
-		/*for (int j = 0; j < corners.size(); j++){
-			cout << j<<"  Cloud  "<< corners[j].size() << endl;
-		}*/
-
-
 		cout << "Corner Extraction Done" << endl;
 	}
 
+# if 0
 	pcXYZI Csegmentation::CornerClusteringKMeans(const pcXYZI &cornercloud, int K)
 	{
-		//cout << "Kmeans began" << endl;
-		KMeans kmeans;
+		// KMeans kmeans;
 
-		st_pointxyz center_arr[5] = {
-			{ 0, 0, 0 },
-			{ 2.5, 2.5, 2.5 },
-			{ 3, 3, -3 },
-			{ 1, 1, 1 },
-			{ 2, 2, 2 }
-		};
+		// st_pointxyz center_arr[5] = {
+		// 	{ 0, 0, 0 },
+		// 	{ 2.5, 2.5, 2.5 },
+		// 	{ 3, 3, -3 },
+		// 	{ 1, 1, 1 },
+		// 	{ 2, 2, 2 }
+		// };
 
-		kmeans.InputCloud(cornercloud.makeShared());
-		kmeans.SetK(K);
-		kmeans.InitKCenter(center_arr);
-		kmeans.Cluster();
-		pcXYZI CenteriodCloud;
-		for (int i = 0; i < K; i++) {
-			pcl::PointXYZI pt;
-			pt.x = kmeans.mv_center[i].x;
-			pt.y = kmeans.mv_center[i].y;
-			pt.z = kmeans.mv_center[i].z;
-			pt.intensity = cornercloud.points[0].intensity;
+		// kmeans.InputCloud(cornercloud.makeShared());
+		// kmeans.SetK(K);
+		// kmeans.InitKCenter(center_arr);
+		// kmeans.Cluster();
+		// pcXYZI CenteriodCloud;
+		// for (int i = 0; i < K; i++) {
+		// 	pcl::PointXYZI pt;
+		// 	pt.x = kmeans.mv_center[i].x;
+		// 	pt.y = kmeans.mv_center[i].y;
+		// 	pt.z = kmeans.mv_center[i].z;
+		// 	pt.intensity = cornercloud.points[0].intensity;
 
-			CenteriodCloud.push_back(pt);
-		}
+		// 	CenteriodCloud.push_back(pt);
+		// }
 
-		cout << "Kmeans done.  point number " << CenteriodCloud.size() << endl;
-		return CenteriodCloud;
+		// cout << "Kmeans done.  point number " << CenteriodCloud.size() << endl;
+		// return CenteriodCloud;
 	}
+#endif
 
 	pcXYZIPtr Csegmentation::planesegRansac(const pcXYZIPtr &cloud, float threshold)
 	{
@@ -1452,16 +1330,8 @@ namespace roadmarking
 			PCL_ERROR("Could not estimate a planar model for the given dataset.");
 		}
 
-		/*cout << "Model coefficients: " << coefficients->values[0] << " "
-			<< coefficients->values[1] << " "
-			<< coefficients->values[2] << " "
-			<< coefficients->values[3] << std::endl;*/
-
 		cout << "Model inliers number: " << inliers->indices.size() << std::endl;
 		pcXYZIPtr fitcloud(new pcXYZI());
-		//fitcloud->width = inliers->indices.size();
-		//fitcloud->height = 1;
-		//fitcloud->points.resize(cloud->width * cloud->height); //��pushback�Ͳ����ȸ��ռ���
 
 		for (size_t i = 0; i < inliers->indices.size(); ++i)
 		{

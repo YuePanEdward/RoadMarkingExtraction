@@ -6,17 +6,6 @@
 #include <pcl/point_cloud.h>
 #include <pcl/ModelCoefficients.h>
 
-//#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-//#include <CGAL/algorithm.h>
-//#include <CGAL/Delaunay_triangulation_2.h>
-//#include <CGAL/Alpha_shape_2.h>
-//#include <CGAL/Cartesian.h>
-//#include <CGAL/bounding_box.h>
-//#include <CGAL/Polygon_2.h>
-//#include <CGAL/Polygon_2_algorithms.h>
-//#include <CGAL/Projection_traits_xy_3.h>
-
-#include <glog/logging.h>
 
 using namespace std;
 
@@ -57,7 +46,6 @@ typedef  pcl::PointCloud<pcl::PointNormal>       Point_Normal;
 typedef  pcl::PointCloud<pcl::PointXYZINormal>::Ptr  PointXYZI_Normal_Ptr;
 typedef  pcl::PointCloud<pcl::PointXYZINormal>      PointXYZI_Normal;
 
-//typedef  vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f>>  VectorIntersecctionPoint;
 
 namespace roadmarking
 {
@@ -108,10 +96,9 @@ namespace roadmarking
 
 	struct BoundingFeature
 	{
-		double corner; //�Ƕ���
-		std::vector<double> sortingEdges; //������������ ���������У�
+		double corner; 
+		std::vector<double> sortingEdges; 
 	};
-
 	
 	struct Voxel
 	{
@@ -119,12 +106,11 @@ namespace roadmarking
 		float min_z;
 		float max_z;
 		float dertaz;
-		float min_z_x;//������͵��X����;
-		float min_z_y;//������͵��y����;
+		float min_z_x;
+		float min_z_y;
 		float NeighborMin_z;
 		int PointsNumber;
 		float mean_z;
-
 		Voxel()
 		{
 			min_z = min_z_x = min_z_y = NeighborMin_z = mean_z = 0.f;
@@ -213,8 +199,6 @@ namespace roadmarking
 			bound.min_z = min_z;
 			bound.max_z = max_z;
 		}
-
-		//��ȡ���ĺͱ߽�
 		void getBoundAndCenter(const pcl::PointCloud<pcl::PointXYZI> & cloud, Bounds & bound, CenterPoint& centerPoint)
 		{
 			double min_x = cloud[0].x;
@@ -228,7 +212,6 @@ namespace roadmarking
 
 			for (int i = 0; i < cloud.size(); i++)
 			{
-				//��ȡ�߽�
 				if (min_x > cloud.points[i].x)
 					min_x = cloud.points[i].x;
 				if (min_y > cloud.points[i].y)
@@ -241,8 +224,6 @@ namespace roadmarking
 					max_y = cloud.points[i].y;
 				if (max_z < cloud.points[i].z)
 					max_z = cloud.points[i].z;
-
-
 				cx += cloud.points[i].x / cloud.size();
 				cy += cloud.points[i].y / cloud.size();
 				cz += cloud.points[i].z / cloud.size();
@@ -270,7 +251,6 @@ namespace roadmarking
 			}
 			getCloudBound(*temp_cloud, bound);
 		}
-
 	protected:
 
 	private:

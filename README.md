@@ -1,10 +1,12 @@
 # RoadMarkingExtraction
-A C++ Program for automatically extraction of road markings from MLS point cloud
+This repository contains a C++ implementation of the automatic extraction, classification and vectorization of road markings from MLS point cloud. It's based on traditional image & point cloud processing approaches, which can act as the easy baseline for novel learning-based methods.
 
 ![alt text](demo/teaser.gif)
 
+-------
+
 ## About
-Version 1.2: Passed on Ubuntu 16.04. For former versions, please check the other branches.
+Version 1.2: passed on Ubuntu 16.04. For former versions, please check the other branches.
 
 Dependent 3rd Party Libs: Eigen3, PCL1.8, OpenCV2, LibLas, DXFLib
 
@@ -25,7 +27,7 @@ cd ..
 
 3. Prepare the model pool (take `./model_pool/xxx` as an example) and configure the parameter list (take `./config/xxx.txt` as an example).
 
-4. Configure the input and output path in `./script/run_xxx.sh`.
+4. Configure the input (`*.las` point cloud) and output path in `./script/run_xxx.sh`.
 
 5. Run `sh ./script/run_xxx.sh`. 
 
@@ -48,9 +50,11 @@ If you find this code useful for your work or use it in your project, please con
 [paper link](https://www.int-arch-photogramm-remote-sens-spatial-inf-sci.net/XLII-2-W13/1089/2019/)
 
 ### Workflow
- ![alt text](demo/framework.jpg)
+ ![alt text](demo/framework.png)
 ### Image Processing
- ![alt text](demo/image_process.jpg)
+ ![alt text](demo/image_process.png)
 ### Demo
- ![alt text](demo/scenarios.jpg)
+ ![alt text](demo/scenarios.png)
  
+### Acknowledgement:
+Thanks [hibetterheyj](https://github.com/hibetterheyj) for the effort to migrate the codes on Linux.

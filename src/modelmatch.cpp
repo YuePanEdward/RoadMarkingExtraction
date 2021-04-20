@@ -9,9 +9,6 @@
 
 #define BOOST_TYPEOF_EMULATION
 #include <pcl/registration/icp.h> 
-//hyj
-// fatal error: ppl.h: 没有那个文件或目录
-//#include <ppl.h> //����;
 
 
 namespace roadmarking
@@ -104,19 +101,16 @@ namespace roadmarking
 						overlapping_ratio = 0.5 * (overlapping_ratio + cal_overlap_ratio(current_scenecloud, model_kdtree.makeShared(), overlapping_dist_thre)); //average overlapping_ratio
 					}
 
-					//special cases
+					//balanced weight
 					if (j == 0) // rectangle 
 						overlapping_ratio -= 0.08;
 					else if (j == 1)  // forward arrow
-						overlapping_ratio += 0.05;
+						overlapping_ratio += 0.03;
 					else if (j == 2)    //right-forward arrow
 					    overlapping_ratio -= 0.01;
-					else if (j == 3)    //right arrow
-					    overlapping_ratio += 0.02;
 					else if (j == 6)    //dimond
 					    overlapping_ratio -= 0.1;
 					
-
 					if (overlapping_ratio > best_overlapping_ratio && temp_match_fitness < correct_match_fitness_thre)
 					{
 						best_overlapping_ratio = overlapping_ratio;
@@ -340,10 +334,3 @@ namespace roadmarking
 		return current_best_fitness;
 	}
 }
-
-
-
-
-//Scene Clouds ����Labeled���� 
-//Model Clouds ���̶ֹ���״�ı���;
-

@@ -52,13 +52,6 @@ namespace roadmarking
 
 		CMatrixIndice.resize(nx, vector<vector<int>>(ny, vector<int>(0)));
 
-		// for (int i = 0; i < nx; i++)
-		// {
-		// 	CMatrixIndice[i].resize(ny);
-		// 	GCMatrixIndice[i].resize(ny);
-		// 	NGCMatrixIndice[i].resize(ny);
-		// }
-
 		//Saving point indices 
 		for (int i = 0; i < c->points.size(); i++)
 		{
@@ -111,7 +104,7 @@ namespace roadmarking
 			CMatrixIndice[i].resize(ny);
 		}
 
-		//Saving point indices  (����һ�ε��� [��ʱ],��취����ָ��ʱ������ţ������Ͳ����ٱ��������ˣ�
+		//Saving point indices 
 		for (size_t i = 0; i < c->points.size(); i++)
 		{
 			ix = (c->points[i].x - minX) / res;
@@ -131,9 +124,7 @@ namespace roadmarking
 		stdi = 0;
 		Number_non_zero_pixel = 0;
 
-		img.create(nx, ny, CV_8UC1); //�����ڴ�
-									 //mini = FLT_MAX;
-									 //maxi = -FLT_MAX;
+		img.create(nx, ny, CV_8UC1); 
 
 		vector<vector<vector<float>>> matrixi;
 		vector<vector<float>> ave;
@@ -158,7 +149,7 @@ namespace roadmarking
 			{
 				for (int j = 0; j < ny; j++)
 				{
-					for (auto k = CMatrixIndice[i][j].begin(); k != CMatrixIndice[i][j].end(); ++k) //���������Ժ���õ������������±�
+					for (auto k = CMatrixIndice[i][j].begin(); k != CMatrixIndice[i][j].end(); ++k)
 						matrixi[i][j].push_back(cloud->points[*k].intensity);
 				}
 			}
@@ -168,7 +159,7 @@ namespace roadmarking
 			{
 				for (int j = 0; j < ny; j++)
 				{
-					for (auto k = GCMatrixIndice[i][j].begin(); k != GCMatrixIndice[i][j].end(); ++k) //���������Ժ���õ������������±�
+					for (auto k = GCMatrixIndice[i][j].begin(); k != GCMatrixIndice[i][j].end(); ++k) 
 						matrixi[i][j].push_back(cloud->points[*k].intensity);
 				}
 			}
@@ -178,7 +169,7 @@ namespace roadmarking
 			{
 				for (int j = 0; j < ny; j++)
 				{
-					for (auto k = NGCMatrixIndice[i][j].begin(); k != NGCMatrixIndice[i][j].end(); ++k) //���������Ժ���õ������������±�
+					for (auto k = NGCMatrixIndice[i][j].begin(); k != NGCMatrixIndice[i][j].end(); ++k) 
 						matrixi[i][j].push_back(cloud->points[*k].intensity);
 				}
 			}
@@ -219,8 +210,7 @@ namespace roadmarking
 
 		stdi /= Number_non_zero_pixel;
 		stdi = sqrt(stdi);
-		maxi = meani + times_std * stdi; // ���times_stdҪ���
-
+		maxi = meani + times_std * stdi; 
 		for (int i = 0; i < nx; i++)
 		{
 			for (int j = 0; j < ny; j++)
@@ -235,8 +225,8 @@ namespace roadmarking
 	void Imageprocess::pc2imgZ(const pcXYZIPtr &cloud, int whatcloud, Mat &img)
 	{
 
-		float minaz, maxaz;			 //maxaz,minaz ��ͼƬ��������max��minz���������ڵľ�ֵ��
-		img.create(nx, ny, CV_8UC1); //�����ڴ�
+		float minaz, maxaz;			 
+		img.create(nx, ny, CV_8UC1); 
 
 		minaz = FLT_MAX;
 		maxaz = -FLT_MAX;
@@ -252,7 +242,7 @@ namespace roadmarking
 			ave[i].resize(ny);
 			for (int j = 0; j < ny; j++)
 			{
-				matrixz[i][j].push_back(minZ); //����͵�̲߳���
+				matrixz[i][j].push_back(minZ); 
 			}
 		}
 
@@ -263,7 +253,7 @@ namespace roadmarking
 			{
 				for (int j = 0; j < ny; j++)
 				{
-					for (auto k = CMatrixIndice[i][j].begin(); k != CMatrixIndice[i][j].end(); ++k) //���������Ժ���õ������������±�
+					for (auto k = CMatrixIndice[i][j].begin(); k != CMatrixIndice[i][j].end(); ++k) 
 						matrixz[i][j].push_back(cloud->points[*k].z);
 				}
 			}
@@ -273,7 +263,7 @@ namespace roadmarking
 			{
 				for (int j = 0; j < ny; j++)
 				{
-					for (auto k = GCMatrixIndice[i][j].begin(); k != GCMatrixIndice[i][j].end(); ++k) //���������Ժ���õ������������±�
+					for (auto k = GCMatrixIndice[i][j].begin(); k != GCMatrixIndice[i][j].end(); ++k)
 						matrixz[i][j].push_back(cloud->points[*k].z);
 				}
 			}
@@ -283,7 +273,7 @@ namespace roadmarking
 			{
 				for (int j = 0; j < ny; j++)
 				{
-					for (auto k = NGCMatrixIndice[i][j].begin(); k != NGCMatrixIndice[i][j].end(); ++k) //���������Ժ���õ������������±�
+					for (auto k = NGCMatrixIndice[i][j].begin(); k != NGCMatrixIndice[i][j].end(); ++k) 
 						matrixz[i][j].push_back(cloud->points[*k].z);
 				}
 			}
@@ -293,10 +283,7 @@ namespace roadmarking
 		for (int i = 0; i < nx; i++)
 		{
 			for (int j = 0; j < ny; j++)
-			{
 				ave[i][j] = (0.1 + accumulate(begin(matrixz[i][j]), end(matrixz[i][j]), 0.0)) / matrixz[i][j].size();
-				//���������ȡƽ��
-			}
 		}
 
 		for (int i = 0; i < nx; i++)
@@ -306,22 +293,19 @@ namespace roadmarking
 				maxaz = max(maxaz, ave[i][j]);
 				minaz = min(minaz, ave[i][j]);
 			}
-		} // ��ȡ�����С����ƽ���߳�
+		} 
 
 		for (int i = 0; i < nx; i++)
 		{
 			for (int j = 0; j < ny; j++)
-			{
 				img.at<uchar>(i, j) = 255 * (ave[i][j] - minaz) / (maxaz - minaz);
-				//pixel ��ֵ
-			}
 		}
 	}
 
 	void Imageprocess::pc2imgD(const pcXYZIPtr &cloud, int whatcloud, Mat &img, float expected_max_point_num_in_a_pixel)
 	{
 
-		img.create(nx, ny, CV_8UC1); //�����ڴ�
+		img.create(nx, ny, CV_8UC1); 
 		Eigen::MatrixXi Matrixnum;
 		int maxnum, maxelement;
 		Matrixnum.resize(nx, ny);
@@ -333,27 +317,21 @@ namespace roadmarking
 			for (int i = 0; i < nx; i++)
 			{
 				for (int j = 0; j < ny; j++)
-				{
 					Matrixnum(i, j) = CMatrixIndice[i][j].size();
-				}
 			}
 			break;
 		case 1: //Ground Point Cloud
 			for (int i = 0; i < nx; i++)
 			{
 				for (int j = 0; j < ny; j++)
-				{
 					Matrixnum(i, j) = GCMatrixIndice[i][j].size();
-				}
 			}
 			break;
 		case 2: //Non-Ground Point Cloud
 			for (int i = 0; i < nx; i++)
 			{
 				for (int j = 0; j < ny; j++)
-				{
 					Matrixnum(i, j) = NGCMatrixIndice[i][j].size();
-				}
 			}
 			break;
 		}
@@ -374,7 +352,6 @@ namespace roadmarking
 				else
 					out = 255;
 				img.at<uchar>(i, j) = out;
-				//pixel ��ֵ
 			}
 		}
 	}
@@ -435,7 +412,6 @@ namespace roadmarking
 			{
 				int pixelValue = data_src[j - tjmin];
 
-				//���������dZ�ȽϺã�һ�������ص��ˣ�����ȫ
 				if (pixelValue > 1)
 				{
 					double max_z, min_z, disz;
@@ -459,23 +435,11 @@ namespace roadmarking
 					else
 					{
 						if (outclouds[pixelValue - 2].size() == 0)
-							outclouds[pixelValue - 2].points.push_back(incloud->points[GCMatrixIndice[i][j][0]]); //������ֿյ�����֮���ٰ������˳�
+							outclouds[pixelValue - 2].points.push_back(incloud->points[GCMatrixIndice[i][j][0]]); 
 					}
 				}
 			}
 		}
-
-		/*for (size_t i = 0; i < nx; i++) //The same
-	{
-		for (size_t j = 0; j < ny; j++)
-		{
-			if (img.at<int>(i, j) > 1) //ע�������� 32S�ģ�������uchar��
-			{
-				for (auto k = GCMatrixIndice[i][j].begin(); k != GCMatrixIndice[i][j].end(); ++k)
-					outclouds[img.at<int>(i, j)-2].points.push_back(incloud->points[*k]);
-			}
-		}
-	}*/
 
 		for (int k = 0; k <= totallabel - 2; k++)
 		{
@@ -498,7 +462,6 @@ namespace roadmarking
 			{
 				int pixelValue = data_src[j - tjmin];
 
-				//���������dZ�ȽϺã�һ�������ص��ˣ�����ȫ
 				if (pixelValue > 1)
 				{
 					double max_z, min_z, disz;
@@ -541,15 +504,12 @@ namespace roadmarking
 		//Using Sobel Operation
 		Mat grad_xg, grad_yg, abs_grad_xg, abs_grad_yg, dstg;
 
-		//��ԭʼͼת��Ϊ�Ҷ�ͼ
-		//cvtColor(img0, grayImage, COLOR_BGR2GRAY);
-		//��x�����ݶ�
 		Sobel(img0, grad_xg, CV_16S, 1, 0, 3, 1, 1, BORDER_DEFAULT);
 		convertScaleAbs(grad_xg, abs_grad_xg);
-		//��y�����ݶ�S
+
 		Sobel(img0, grad_yg, CV_16S, 0, 1, 3, 1, 1, BORDER_DEFAULT);
 		convertScaleAbs(grad_yg, abs_grad_yg);
-		//�ϲ��ݶ�
+
 		addWeighted(abs_grad_xg, 0.5, abs_grad_yg, 0.5, 0, dstg);
 		return dstg;
 	}
@@ -560,21 +520,14 @@ namespace roadmarking
 		const float *pDataHist = (float *)hist.ptr<float>(0);
 		for (int i = 0; i < 256; i++)
 		{
-			//�ۼƱ���ֵ
 			if (i < threshold)
-			{
 				BackgroundSum += pDataHist[i];
-			}
-			//�ۼ�ǰ��ֵ
 			else
-			{
 				targetSum += pDataHist[i];
-			}
 		}
 		float BackgroundEntropy = 0, targetEntropy = 0;
 		for (int i = 0; i < 256; i++)
 		{
-			//���㱳����
 			if (i < threshold)
 			{
 				if (pDataHist[i] == 0)
@@ -582,7 +535,7 @@ namespace roadmarking
 				float ratio1 = pDataHist[i] / BackgroundSum;
 				BackgroundEntropy += -ratio1 * logf(ratio1);
 			}
-			else //����ǰ����
+			else
 			{
 				if (pDataHist[i] == 0)
 					continue;
@@ -590,7 +543,7 @@ namespace roadmarking
 				targetEntropy += -ratio2 * logf(ratio2);
 			}
 		}
-		return (targetEntropy + BackgroundEntropy); //�Ӻͣ��õ���ǰ��ֵ����
+		return (targetEntropy + BackgroundEntropy); 
 	}
 
 	Mat Imageprocess::maxEntropySegMentation(Mat inputImage)
@@ -606,7 +559,7 @@ namespace roadmarking
 		float maxentropy = 0;
 		int max_index = 0;
 		Mat result;
-		for (int i = 0; i < 256; i++) //����256��ֵ��Ϊ��ֵ�� ��ȡ�����ֵ
+		for (int i = 0; i < 256; i++) 
 		{
 			float cur_entropy = caculateCurrentEntropy(hist, i);
 			if (cur_entropy > maxentropy)
@@ -637,31 +590,14 @@ namespace roadmarking
 				{
 					result.at<uchar>(i, j) = _imgI.at<uchar>(i, j);
 				}
-
-				/*if (result.at<uchar>(i, j) == 1)
-			{
-				arrayi.push_back(i);
-				arrayj.push_back(j);
-			}*/
 			}
 		}
 		return result;
-
-		/*maxi = *(std::max_element(std::begin(arrayi), std::end(arrayi)));
-	 mini = *(std::min_element(std::begin(arrayi), std::end(arrayi)));
-	 maxj = *(std::max_element(std::begin(arrayj), std::end(arrayj)));
-	 minj = *(std::min_element(std::begin(arrayj), std::end(arrayj)));
-
-	 Rect rect(mini, minj, maxi-mini+1, maxj-minj+1);
-	 Mat ROI = result(rect);
-	 return ROI;*/
 	}
 	Mat Imageprocess::ExtractRoadPixelIZ(const Mat &_imgI, const Mat &_binZ)
 	{
 		Mat result;
 		_imgI.convertTo(result, CV_8UC1);
-		//int mini, minj, maxi, maxj;
-		//vector <int> arrayi, arrayj;
 		for (int i = 0; i < _imgI.rows; i++)
 		{
 			for (int j = 0; j < _imgI.cols; j++)
@@ -681,14 +617,12 @@ namespace roadmarking
 	void Imageprocess::CcaByTwoPass(const Mat &_binImg, Mat &_labelImg)
 	{
 		// connected component analysis (8-component)
-		// use two-pass algorithm ����ɨ�跨
+		// use two-pass algorithm 
 		// 1. first pass: label each foreground pixel with a label
 		// 2. second pass: visit each labeled pixel and merge neighbor labels
 		//
 		// foreground pixel: _binImg(x,y) = 1
 		// background pixel: _binImg(x,y) = 0
-
-		//  reference: https://blog.csdn.net/icvpr/article/details/10259577
 
 		if (_binImg.empty() ||
 			_binImg.type() != CV_8UC1)
@@ -699,56 +633,52 @@ namespace roadmarking
 		// 1. first pass
 
 		_labelImg.release();
-		_binImg.convertTo(_labelImg, CV_32SC1); // _labelImg -> _binImg  32 Signed Ϊ���ܷ��㹻������label������������32λ��
+		_binImg.convertTo(_labelImg, CV_32SC1); // _labelImg -> _binImg  32 Signed 
 
 		int label = 1;		   // start by 2
-		vector<int> labelSet;  // ������label
+		vector<int> labelSet;  
 		labelSet.push_back(0); // background: 0
 		labelSet.push_back(1); // foreground: 1
 
 		int rows = _binImg.rows - 1;
 		int cols = _binImg.cols - 1;
-		for (int i = 1; i < rows; i++) // �б���
+		for (int i = 1; i < rows; i++) 
 		{
-			int *data_preRow = _labelImg.ptr<int>(i - 1); // ָ����һ��
-			int *data_curRow = _labelImg.ptr<int>(i);	  // ָ����һ��
-			for (int j = 1; j < cols; j++)				  // �б���
+			int *data_preRow = _labelImg.ptr<int>(i - 1); 
+			int *data_curRow = _labelImg.ptr<int>(i);	  
+			for (int j = 1; j < cols; j++)				  
 			{
-				if (data_curRow[j] == 1) // �� ��ǰ�� ������ ��ǰ�� �����ǻ�û��label��
+				if (data_curRow[j] == 1) 
 				{
-					vector<int> neighborLabels;			// ��������label����
-					neighborLabels.reserve(2);			// Ԥ���ռ�
-					int leftPixel = data_curRow[j - 1]; // ����������
-					int upPixel = data_preRow[j];		// ����������
-					//int leftupPixel = data_preRow[j - 1];                   // ������������
+					vector<int> neighborLabels;			
+					neighborLabels.reserve(2);			
+					int leftPixel = data_curRow[j - 1]; 
+					int upPixel = data_preRow[j];		
+					//int leftupPixel = data_preRow[j - 1];                 
 
-					if (leftPixel > 1) // �������������Լ���label
+					if (leftPixel > 1) //
 					{
-						neighborLabels.push_back(leftPixel); // ����label �������label�ӽ�ȥ
+						neighborLabels.push_back(leftPixel); 
 					}
-					if (upPixel > 1) // �������������Լ���label
+					if (upPixel > 1) 
 					{
-						neighborLabels.push_back(upPixel); // ����label �������label�ӽ�ȥ
+						neighborLabels.push_back(upPixel); 
 					}
-					/*if (leftupPixel > 1)                                    // ���������������Լ���label
-				{
-					neighborLabels.push_back(leftPixel);                // ����label ���������label�ӽ�ȥ
-				}*/
 
-					if (neighborLabels.empty()) // �����򶼻�ûlabel
+					if (neighborLabels.empty()) //
 					{
 						labelSet.push_back(++label); // assign to a new label
-						data_curRow[j] = label;		 // ��ǰ���ر�Ϊ��label
+						data_curRow[j] = label;	
 						labelSet[label] = label;
 					}
-					else // ��Ȼ �����������label�ˣ�
+					else
 					{
-						sort(neighborLabels.begin(), neighborLabels.end()); // ����label���� ��С������
+						sort(neighborLabels.begin(), neighborLabels.end());
 						int smallestLabel = neighborLabels[0];
-						data_curRow[j] = smallestLabel; // ��ǰ���ظ���С��label
+						data_curRow[j] = smallestLabel; 
 
 						// save equivalence
-						for (size_t k = 1; k < neighborLabels.size(); k++) // ��������label��
+						for (size_t k = 1; k < neighborLabels.size(); k++) 
 						{
 							int tempLabel = neighborLabels[k]; //
 							int &oldSmallestLabel = labelSet[tempLabel];
@@ -769,8 +699,7 @@ namespace roadmarking
 
 		// update equivalent labels
 		// assigned with the smallest label in each equivalent label set
-		// ��¼Neighbors�и���ֵ��label��֮�����ȹ�ϵ������Щֵ��label��ͬ��ͬһ����ͨ����
-		for (size_t i = 2; i < labelSet.size(); i++) // 0,1 ����
+		for (size_t i = 2; i < labelSet.size(); i++) 
 		{
 			int curLabel = labelSet[i];
 			int preLabel = labelSet[curLabel];
@@ -806,8 +735,6 @@ namespace roadmarking
 		// foreground pixel: _binImg(x,y) = 1
 		// background pixel: _binImg(x,y) = 0
 
-		// ע��������䷨Ҫ���Եһ�����ض���Ϊ0��Ϊ1�Ļ����±�Խ����
-
 		if (_binImg.empty() ||
 			_binImg.type() != CV_8UC1)
 		{
@@ -816,11 +743,11 @@ namespace roadmarking
 		}
 
 		_lableImg.release();
-		_binImg.convertTo(_lableImg, CV_32SC1); //_labelImg �� CV_32SC1��
+		_binImg.convertTo(_lableImg, CV_32SC1); 
 
 		int label = 1; // start by 2
 		//vector<vector<pair<int, int>>> labeledPixel;
-		//labeledPixel.resize(10000); // ����д��̫�Ͻ�����Ϊ���10000����
+		//labeledPixel.resize(10000);
 
 		int rows = _binImg.rows;
 		int cols = _binImg.cols;
@@ -885,87 +812,64 @@ namespace roadmarking
 				}
 			}
 		}
-		/*int labelnumber=label-1;
-	for (int m = 2; m <= label; m++){
-		if (labeledPixel[m].size() < K){
-			for (int n = 0; n < labeledPixel[m].size(); n++){
-				int del_i = labeledPixel[m][n].first;
-				int del_j = labeledPixel[m][n].second;
-				_lableImg.at<int>(del_i, del_j) = 0;
-			}
-			labelnumber--;
-		}
-	}*/
 		totallabel = label;
-
-		//cout << "Number label: " << totallabel << endl;
 	}
 
 	void Imageprocess::RemoveSmallRegion(const Mat &Src, Mat &Dst, int AreaLimit)
 	{
 		int RemoveCount = 0;
-		//�½�һ����ǩͼ���ʼ��Ϊ0���ص㣬Ϊ�˼�¼ÿ�����ص����״̬�ı�ǩ��0����δ��飬1�������ڼ��,2������鲻�ϸ���Ҫ��ת��ɫ����3�������ϸ������
-		//��ʼ����ͼ��ȫ��Ϊ0��δ���
 		Src.convertTo(Dst, CV_8UC1);
-		int CheckMode = 1;	 //��ɫ��Ϊ��ͨ��
-		int NeihborMode = 1; //8����
+		int CheckMode = 1;	 
+		int NeihborMode = 1; 
 		Mat PointLabel = Mat::zeros(Src.size(), CV_8UC1);
-		if (CheckMode == 1) //ȥ��С��ͨ����İ�ɫ��
+		if (CheckMode == 1) 
 		{
-			//cout << "ȥ��С��ͨ��.";
 			for (int i = 0; i < Src.rows; i++)
 			{
 				for (int j = 0; j < Src.cols; j++)
 				{
 					if (Src.at<uchar>(i, j) < 1)
-					{
-						PointLabel.at<uchar>(i, j) = 3; //��������ɫ����Ϊ�ϸ�����Ϊ3
-					}
+						PointLabel.at<uchar>(i, j) = 3; 
 				}
 			}
 		}
-		else //ȥ���׶�����ɫ������
+		else 
 		{
-			//cout << "ȥ���׶�";
 			for (int i = 0; i < Src.rows; i++)
 			{
 				for (int j = 0; j < Src.cols; j++)
 				{
 					if (Src.at<uchar>(i, j) > 10)
-					{
-						PointLabel.at<uchar>(i, j) = 3; //���ԭͼ�ǰ�ɫ���򣬱��Ϊ�ϸ�����Ϊ3
-					}
+						PointLabel.at<uchar>(i, j) = 3; 
 				}
 			}
 		}
 
-		vector<Point2i> NeihborPos; //������ѹ������
+		vector<Point2i> NeihborPos;
 		NeihborPos.push_back(Point2i(-1, 0));
 		NeihborPos.push_back(Point2i(1, 0));
 		NeihborPos.push_back(Point2i(0, -1));
 		NeihborPos.push_back(Point2i(0, 1));
 		if (NeihborMode == 1)
 		{
-			//cout << "Neighbor mode: 8����." << endl;
 			NeihborPos.push_back(Point2i(-1, -1));
 			NeihborPos.push_back(Point2i(-1, 1));
 			NeihborPos.push_back(Point2i(1, -1));
 			NeihborPos.push_back(Point2i(1, 1));
 		}
 		else
-			int a = 0; //cout << "Neighbor mode: 4����." << endl;
+			int a = 0; 
 		int NeihborCount = 4 + 4 * NeihborMode;
 		int CurrX = 0, CurrY = 0;
-		//��ʼ���
 		for (int i = 0; i < Src.rows; i++)
 		{
 			for (int j = 0; j < Src.cols; j++)
 			{
-				if (PointLabel.at<uchar>(i, j) == 0) //��ǩͼ�����ص�Ϊ0����ʾ��δ���Ĳ��ϸ��
-				{									 //��ʼ���
-					vector<Point2i> GrowBuffer;		 //��¼������ص�ĸ���
+				if (PointLabel.at<uchar>(i, j) == 0) 
+				{									
+					vector<Point2i> GrowBuffer;		 
 					GrowBuffer.push_back(Point2i(j, i));
-					PointLabel.at<uchar>(i, j) = 1; //���Ϊ���ڼ��
+					PointLabel.at<uchar>(i, j) = 1;
 					int CheckResult = 0;
 
 					for (int z = 0; z < GrowBuffer.size(); z++)
@@ -974,36 +878,33 @@ namespace roadmarking
 						{
 							CurrX = GrowBuffer.at(z).x + NeihborPos.at(q).x;
 							CurrY = GrowBuffer.at(z).y + NeihborPos.at(q).y;
-							if (CurrX >= 0 && CurrX < Src.cols && CurrY >= 0 && CurrY < Src.rows) //��ֹԽ��
+							if (CurrX >= 0 && CurrX < Src.cols && CurrY >= 0 && CurrY < Src.rows) 
 							{
 								if (PointLabel.at<uchar>(CurrY, CurrX) == 0)
 								{
-									GrowBuffer.push_back(Point2i(CurrX, CurrY)); //��������buffer
-									PointLabel.at<uchar>(CurrY, CurrX) = 1;		 //���������ļ���ǩ�������ظ����
+									GrowBuffer.push_back(Point2i(CurrX, CurrY)); 
+									PointLabel.at<uchar>(CurrY, CurrX) = 1;		
 								}
 							}
 						}
 					}
-					if (GrowBuffer.size() > AreaLimit) //�жϽ�����Ƿ񳬳��޶��Ĵ�С����1Ϊδ������2Ϊ����
+					if (GrowBuffer.size() > AreaLimit)
 						CheckResult = 2;
 					else
 					{
 						CheckResult = 1;
-						RemoveCount++; //��¼�ж�������ȥ��
+						RemoveCount++; 
 					}
-
 					for (int z = 0; z < GrowBuffer.size(); z++)
 					{
 						CurrX = GrowBuffer.at(z).x;
 						CurrY = GrowBuffer.at(z).y;
-						PointLabel.at<uchar>(CurrY, CurrX) += CheckResult; //��ǲ��ϸ�����ص㣬����ֵΪ2
+						PointLabel.at<uchar>(CurrY, CurrX) += CheckResult; 
 					}
-					//********�����õ㴦�ļ��**********
 				}
 			}
 		}
 		CheckMode = 255 * (1 - CheckMode);
-		//��ʼ��ת�����С������
 		for (int i = 0; i < Src.rows; ++i)
 		{
 			for (int j = 0; j < Src.cols; ++j)
@@ -1012,20 +913,18 @@ namespace roadmarking
 				{
 					Dst.at<uchar>(i, j) = 0;
 				}
-				//else if (PointLabel.at<uchar>(i, j) == 3)
 				else
 				{
 					Dst.at<uchar>(i, j) = Src.at<uchar>(i, j);
 				}
 			}
 		}
-		//cout << RemoveCount << " objects removed." << endl;
 	}
 
 	Scalar Imageprocess::GetRandomColor()
 	{
 		uchar r = 255 * (rand() / (1.0 + RAND_MAX)); // rand() / (1.0+ RAND_MAX) : a random float number between 0 and 1 (can't be equal to 1)
-		uchar g = 255 * (rand() / (1.0 + RAND_MAX)); // rand() 0 ~ 0x7fff ��32767��  RAND_MAX = 32767
+		uchar g = 255 * (rand() / (1.0 + RAND_MAX)); 
 		uchar b = 255 * (rand() / (1.0 + RAND_MAX));
 		return Scalar(b, g, r);
 	}
@@ -1038,10 +937,7 @@ namespace roadmarking
 			return;
 		}
 
-		std::map<int, Scalar> colors; //ӳ��
-
-		//labelx.resize(totallabel - 1);
-		//labely.resize(totallabel - 1);
+		std::map<int, Scalar> colors;
 
 		int rows = _labelImg.rows;
 		int cols = _labelImg.cols;
@@ -1060,7 +956,7 @@ namespace roadmarking
 				if (pixelValue > 1)
 				{
 					//if(j%100==0) cout << pixelValue << endl;
-					//labelx[pixelValue - 2].push_back(i); // ȷ����Label��ռ�ݵ�����֮x��y
+					//labelx[pixelValue - 2].push_back(i);
 					//labely[pixelValue - 2].push_back(j);
 
 					if (colors.count(pixelValue) <= 0)
@@ -1089,7 +985,6 @@ namespace roadmarking
 		maxi = 0;
 		maxj = 0;
 
-		// ����Ȧ����;
 		for (int i = 0; i < Img.rows; i++)
 		{
 			Img.at<uchar>(i, 0) = 0;
@@ -1146,21 +1041,20 @@ namespace roadmarking
 		src.convertTo(imageGray, CV_8UC1);
 		corner = Mat::zeros(src.size(), CV_32FC1);
 		cornerHarris(imageGray, corner, 3, 3, 0.04, BORDER_DEFAULT);
-		normalize(corner, corner8u, 0, 255, CV_MINMAX); //��һ��
+		normalize(corner, corner8u, 0, 255, CV_MINMAX); 
 		convertScaleAbs(corner8u, cornershow);
 		cornerwithimg = colorlabel.clone();
 		for (int i = 0; i < src.rows; i++)
 		{
 			for (int j = 0; j < src.cols; j++)
 			{
-				if (cornershow.at<uchar>(i, j) > threshold) //��ֵ�ж�
+				if (cornershow.at<uchar>(i, j) > threshold)
 				{
-					circle(cornerwithimg, Point(j, i), 2, Scalar(255, 255, 255), 2); //��ע�ǵ�
+					circle(cornerwithimg, Point(j, i), 2, Scalar(255, 255, 255), 2); 
 				}
 			}
 		}
 	}
-	//bug�ĸ�Դ����CCA �������Ա�Ե���صĴ������±�Խ��
 	void Imageprocess::ImgReverse(const Mat &img, Mat &img_reverse)
 	{
 		img.convertTo(img_reverse, CV_8UC1);
@@ -1243,39 +1137,13 @@ namespace roadmarking
 	void Imageprocess::saveimg(std::string outputFolder,
 							   int file_index, const Mat &ProjI, const Mat &ProjZ, const Mat &ProjD, const Mat &ProjImf, const Mat &GI, const Mat &GZ, const Mat &BZ, const Mat &BD, const Mat &GIR, const Mat &BI, const Mat &BIF, const Mat &Label)
 	{
-		// std::string outputFolder;
-
-		// ostringstream oss;
-		// oss << "\\Images_"<< file_index;
-		// oss << "/Images_" << file_index;
-		// // outputFolder = outputFolder_base + "\\Geo-reference Images";
-		// outputFolder = outputFolder_base + "/Geo-reference Images";
 		
 		if (!boost::filesystem::exists(outputFolder))
 		{
 			boost::filesystem::create_directory(outputFolder);
 		}
 
-		// outputFolder = outputFolder + oss.str();
-
-		// if (!boost::filesystem::exists(outputFolder))
-		// {
-		// 	boost::filesystem::create_directory(outputFolder);
-		// }
-
 		string img1, img2, img3, img4, img5, img6, img7, img8, img9, img10, img11, img12;
-		// // img1 = outputFolder + "\\" + "1_Intensity Projection Image.jpg";
-		// // img2 = outputFolder + "\\" + "2_Elevation Projection Image.jpg";
-		// // img3 = outputFolder + "\\" + "3_Density Projection Image.jpg";
-		// // img4 = outputFolder + "\\" + "4_Intensity Projection Image after Median Filter.jpg";
-		// // img5 = outputFolder + "\\" + "5_Intensity Gradient Image.jpg";
-		// // img6 = outputFolder + "\\" + "6_Slope Image.jpg";
-		// // img7 = outputFolder + "\\" + "7_Slope Binary Image.jpg";
-		// // img8 = outputFolder + "\\" + "8_Density Binary Image.jpg";
-		// // img9 = outputFolder + "\\" + "9_Road Intensity Gradient Image.jpg";
-		// // img10 = outputFolder + "\\" + "10_Road Intensity Binary Image.jpg";
-		// // img11 = outputFolder + "\\" + "11_CCA Filter Road Intensity Binary Image.jpg";
-		// // img12 = outputFolder + "\\" + "12_RoadMarkings.jpg";
 
 		img1 = outputFolder + "/" + "1_Intensity Projection Image.jpg";
 		img2 = outputFolder + "/" + "2_Elevation Projection Image.jpg";

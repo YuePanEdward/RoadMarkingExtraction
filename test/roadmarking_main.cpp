@@ -11,11 +11,8 @@ using namespace std;
 using namespace roadmarking;
 using namespace cv;
 
-// This is an example of an exported function.
-//ROADMARKINGDLL_API
 int main(int argc, char *argv[])
 {
-    
     if (argc < 3)
     {
        printf("Syntax is: %s input_file.las output_folder [model_pool] [config_file]\n", argv[0]);
@@ -52,34 +49,14 @@ int main(int argc, char *argv[])
     //5. combine or delete some of the roadmarkings and then do vectorization based on bounding box and template
     //localization information
     //Implementation:
-    //OS: windows 10, Programming Language: C++
-    //Compile with VS2013 x64 Release or Debug (V1.1) [2019.1]
-    //Compile with VS2017 x64 Release DLL (V2.0) [2020.6]
-    //Dependent 3rd Party Libs:  PCL 1.7, OpenCV 2 , LASLib, LibBoost, GDAL (v2.0)
-    //Point Cloud Acquisition Platform: MLS, TLS, ALS (Developing)
-    //Application Scenarios: Highway, City Road
-    //Author��Yue Pan et al. @ WHU
-
-    //Consuming time : For MLS point cloud with about 10 million points
-    //                 10 seconds together with ground segmentation (recommended)
-
-    //Change Log: [v1.0 --> v2.0]
-    // 1. enable dll [passed]
-    // 2. speed up by 200% [passed]
-    // 3. improve the template matching algorithm [passed]
-    // 4. replace liblas with LASLib [passed]
-    // 5. replace dxflib (*dxf vector) with GDAL (*shp vector) [failed]
-    // 6. add more templates [pending]
-
+    //Dependent 3rd Party Libs: Eigen 3, PCL 1.7, OpenCV 2, Liblas, GDAL(optional), LASLib(optional)
+    //Point Cloud Acquisition Platform: mainly MLS 
+    //Application Scenarios: Highway, Urban Road
+    //Author: Yue Pan et al. @ WHU
     /*-----------------------------------------------------------------------------------------------------------*/
-    /*google::InitGoogleLogging("Mylog");
-	google::SetLogDestination(google::GLOG_INFO, "./log/");*/
 
-    /*-------------------------------------------------Welcome---------------------------------------------------*/
     cout << "-------------------------------------------------------------" << endl;
     cout << "Road Markings Extraction Module" << endl;
-   
-    /*-----------------------------------------------------------------------------------------------------------*/
 
     /*-----------------------------------------------Declaration-------------------------------------------------*/
     clock_t t1, t2; // Timing
@@ -152,13 +129,13 @@ int main(int argc, char *argv[])
     //Step 3. Ground Filter and projection (Optional)
     // The Ground Segmentation can help you find the road more precisely. However, this process would take more time.
     // Method 1: Dual-threshold grid based filter (Fast)
-    // Parameter Setting: grid_resolution_ = 0.5, min_pt_num_in_grid_ = 30, max_height_difference_ = 0.2
+    // Parameter Setting: grid_res_ = 0.5, min_pt_num_grid_ = 30, max_height_diff_ = 0.2
     Ground_Extraction ground;
     StructOperator so;
     Bounds bounds;
     CenterPoint center;
     so.getBoundAndCenter(*cloud, bounds, center);
-    ground.ExtractGroundPoint(cloud, gcloud, ngcloud, bounds, center);
+    ground.Extract_ground_pts(cloud, gcloud, ngcloud, bounds, center);
     // cout << "Ground: " << gcloud->points.size() << ", "
     //      << "Non-Ground: " << ngcloud->points.size() << endl;
     cout << "Ground Segmentation done.\n";
@@ -281,7 +258,7 @@ int main(int argc, char *argv[])
     //Step 7. Object Recognition and Classification based on Model Matching and Geometric Information
     //7.1 Boundary and Corner Extraction (Optional)
     // Boundary Extraction: Alpha-Shape Concave Hull Generation
-    seg.BoundaryExtraction(outcloud_otsu_sor_n, boundaryclouds, 2, 0.75);
+    seg.BoundaryExtraction(outcloud_otsu_sor_n, boundaryclouds, 2, 0.7);
     // Corner Extraction: Neighborhood Processing
     // seg.CornerExtraction(boundaryclouds,cornerclouds,1,8,0.1,0.02,0.95); // Parameters: 1/0 Use Radius Search or KNN, 8, KNN's K, 0.15 search radius , 0.02 distance threshold, 0.94 maxcos
     cout << "Find [" << boundaryclouds.size() << "] candidate roadmarkings\n";
@@ -336,29 +313,26 @@ int main(int argc, char *argv[])
     ip.saveimg(output_sub_folder+"/Geo-referenced_Image", 0, imgI, imgZ, imgD, imgImf, imgIgradient, imgZgradient, imgZbinary, imgDbinary, imgIgradientroad, imgIbinary, imgFilled, colorLabelImg); //Saving the Images
     
     // Output pointcloud
-    // io.writePcdFile(outputFilePath+"/Groundcloud", gcloud);
-    // io.writePcdFile(outputFilePath+"/Ungroundcloud", ngcloud);
-    // io.writePcdAll(outputFilePath+"/Labeled_Clouds", "labeled.pcd", outclouds);
+    // You can view the results in CloudCompare or AutoDesk Recap
     // io.writePcdAll(outputFilePath+"/Filtered_Labeled_Clouds", "filtered_labeled.pcd", outcloud_otsu_sor_n);
-    io.writePcdAll(output_sub_folder+"/Boundary_Clouds", "boundary.pcd", boundaryclouds);
+    // io.writePcdAll(output_sub_folder+"/Boundary_Clouds", "boundary.pcd", boundaryclouds);
     io.writeLasAll(0, output_sub_folder + "/Classified_Road_Markings", outcloud_otsu_sor_n, roadmarkings, X_origin, Y_origin);
 
     //Output vectorization results
-    //You can view the results on https://beta.sharecad.org/
+    //You can view the results on https://beta.sharecad.org/ or in AutoCAD
     io.writemarkVectDXF(0, output_sub_folder + "/Vectorized_Road_Markings", roadmarkings, sideline_roadmarkings, X_origin, Y_origin); //*.dxf format
     //io.writeRoadmarkingShpWithOffset(outputFilePath, roadmarkings_vect, i, X_origin, Y_origin); //*.shp format 
 
     //timing
     std::cout << "Process file [" << inputFilePath << "] done in [" << time_used.count() << "] s.\n";
 
-    //Display Results //test it again
+    //Display Results 
     if (io.paralist.visualization_on)
     {
     	//io.displayroad(ngcloud, gcloud);                                              //Display non-ground and ground cloud
-    	//io.displaymark(outcloud_otsu_sor_n);                                          //Display road markings point clouds
     	io.displaymarkwithng(outcloud_otsu_sor_n, ngcloud);                             //Display road markings point clouds with non-ground cloud
     	io.displaymarkbycategory(outcloud_otsu_sor_n, roadmarkings);                    //Display road markings point clouds rendered by category
-    	io.displaymarkVect(roadmarkings, sideline_roadmarkings);                        //Display vectorized road markings
+    	//io.displaymarkVect(roadmarkings, sideline_roadmarkings);                        //Display vectorized road markings
     }
 
     return 1;

@@ -22,50 +22,47 @@ namespace roadmarking
 	{
 	  public:
 
-		  void pcgrid(Bounds &boundingbox, float resolution);                   //ͶӰ���Ƹ�����(����������ƣ�
+		  void pcgrid(Bounds &boundingbox, float resolution);                   
 		  
-		  void savepcgrid(Bounds &boundingbox, float resolution, const pcXYZIPtr &c);   //ͶӰ���Ƹ���������¼���
-		  void savepcgrid(Bounds &boundingbox, float resolution,  pcXYZIPtr &c,  pcXYZIPtr &gc, pcXYZIPtr &ngc);   //ͶӰ���Ƹ���������¼���, ���أ�����ͷǵ����
-		  void pc2imgI(const pcXYZIPtr &cloud, int whatcloud,  Mat &img, float times_std);               //����ת����ǿ��ͼ��  whatcloud[ 0: Original Cloud , 1: Ground Cloud , 2: Non-ground Cloud]; //times_std: maxI = meanI+ times_std*stdI
-		  void pc2imgZ(const pcXYZIPtr &cloud, int whatcloud,  Mat &img);               //����ת�߳�ͼ��      whatcloud[ 0: Original Cloud , 1: Ground Cloud , 2: Non-ground Cloud]
-		  void pc2imgD(const pcXYZIPtr &cloud, int whatcloud,  Mat &img ,float k);      //����ת���ܶ�ͼ��    whatcloud[ 0: Original Cloud , 1: Ground Cloud , 2: Non-ground Cloud] k:expected max point number in a pixel
+		  void savepcgrid(Bounds &boundingbox, float resolution, const pcXYZIPtr &c);   
+		  void savepcgrid(Bounds &boundingbox, float resolution,  pcXYZIPtr &c,  pcXYZIPtr &gc, pcXYZIPtr &ngc);   
+		  void pc2imgI(const pcXYZIPtr &cloud, int whatcloud,  Mat &img, float times_std);         //whatcloud[ 0: Original Cloud , 1: Ground Cloud , 2: Non-ground Cloud]; //times_std: maxI = meanI+ times_std*stdI
+		  void pc2imgZ(const pcXYZIPtr &cloud, int whatcloud,  Mat &img);                          //whatcloud[ 0: Original Cloud , 1: Ground Cloud , 2: Non-ground Cloud]
+		  void pc2imgD(const pcXYZIPtr &cloud, int whatcloud,  Mat &img ,float k);                 //whatcloud[ 0: Original Cloud , 1: Ground Cloud , 2: Non-ground Cloud] k:expected max point number in a pixel
 		 
-		  void img2pc_g(const Mat &img, const pcXYZIPtr &incloud, pcXYZIPtr & outcloud);  //����ͼ��תԭʼ�޹���������� (����㣩
-		  void img2pc_c(const Mat &img, const pcXYZIPtr &incloud, pcXYZIPtr & outcloud);  //����ͼ��תԭʼ�޹���������ƣ����е㣩
+		  void img2pc_g(const Mat &img, const pcXYZIPtr &incloud, pcXYZIPtr & outcloud);  
+		  void img2pc_c(const Mat &img, const pcXYZIPtr &incloud, pcXYZIPtr & outcloud);  
 
-		  void img2pclabel_g(const Mat &img, const pcXYZIPtr &incloud, vector<pcXYZI> &outclouds, double dZ);   //�ָ����ͼ��ת�ָ����(����㣩
-		  void img2pclabel_c(const Mat &img, const pcXYZIPtr &incloud, vector<pcXYZI> &outclouds, double dZ);   //�ָ����ͼ��ת�ָ���ƣ����е㣩
+		  void img2pclabel_g(const Mat &img, const pcXYZIPtr &incloud, vector<pcXYZI> &outclouds, double dZ);   
+		  void img2pclabel_c(const Mat &img, const pcXYZIPtr &incloud, vector<pcXYZI> &outclouds, double dZ); 
 
-		  Mat Sobelboundary(Mat img0);                                                  //Sobel ͼ���Ե��ȡ
+		  Mat Sobelboundary(Mat img0);                                                  //Sobel
 		  
-		  float caculateCurrentEntropy(Mat hist, int threshold);                        //���㵱ǰ��ֵ��ǰ����
-		  Mat maxEntropySegMentation(Mat inputImage);                                   //�������ֵ�ָ�
-		  Mat ExtractRoadPixelIZD(const Mat & _binI,const Mat & _binZ,const Mat & _binD); //�ø߳��ݶȼ����ܶ��˳��ǵ�·���� (for MLS)
-		  Mat ExtractRoadPixelIZ (const Mat & _binI,const Mat & _binZ);                   //�ø߳��ݶ��˳��ǵ�·���� (for ALS)
+		  float caculateCurrentEntropy(Mat hist, int threshold);                      
+		  Mat maxEntropySegMentation(Mat inputImage);                                 
+		  Mat ExtractRoadPixelIZD(const Mat & _binI,const Mat & _binZ,const Mat & _binD); //(for MLS)
+		  Mat ExtractRoadPixelIZ (const Mat & _binI,const Mat & _binZ);                   //(for ALS)
 
-		  void RemoveSmallRegion(const Mat &_binImg, Mat &_binfilter, int AreaLimit);   //�˳����������ٵ���ͨ�� (�����е��Ч�ɣ�
-		  void CcaByTwoPass(const Mat & _binfilterImg, Mat & _labelImg);                //����ɨ�跨��ͨ�ɷַ�����4����
-		  void CcaBySeedFill(const Mat& _binfilterImg, Mat & _lableImg);                //������䷨��ͨ�ɷַ�����8����
+		  void RemoveSmallRegion(const Mat &_binImg, Mat &_binfilter, int AreaLimit);   
+		  void CcaByTwoPass(const Mat & _binfilterImg, Mat & _labelImg);                
+		  void CcaBySeedFill(const Mat& _binfilterImg, Mat & _lableImg);                
 		  
-		  void ImgReverse(const Mat &img, Mat &img_reverse);                            //��ֵ��ͼ��ɫ
-		  void ImgFilling(const Mat &img, Mat &img_fill);                               //�ն����
+		  void ImgReverse(const Mat &img, Mat &img_reverse);                            
+		  void ImgFilling(const Mat &img, Mat &img_fill);                              
 
-		  void LabelColor(const Mat & _labelImg, Mat & _colorImg);                      //��ͨ����ɫ
-		  Scalar GetRandomColor();                                                      //���ȡɫ��
+		  void LabelColor(const Mat & _labelImg, Mat & _colorImg);                     
+		  Scalar GetRandomColor();                                                      
 
-		  void DetectCornerHarris(const Mat & src, const Mat & colorlabel, Mat & cornershow, Mat & cornerwithimg, int threshold);                                //Harris�ǵ���
-		  void DetectCornerShiTomasi(const Mat & src, const Mat & colorlabel, Mat & cornerwithimg, int minDistance, double mincorenerscore);                     //Shi-Tomasi�ǵ���
+		  void DetectCornerHarris(const Mat & src, const Mat & colorlabel, Mat & cornershow, Mat & cornerwithimg, int threshold);                                //Harris
+		  void DetectCornerShiTomasi(const Mat & src, const Mat & colorlabel, Mat & cornerwithimg, int minDistance, double mincorenerscore);                     //Shi-Tomasi
 
-		  void Truncate( Mat & Img, Mat & TImg);                                    //ͼ�����ػҶ�ֵ���������ȡ
+		  void Truncate( Mat & Img, Mat & TImg);                                   
 
 		  //Save images
 		  void saveimg(const Mat &ProjI, const Mat &ProjZ, const Mat &ProjD, const Mat &ProjImf, const Mat &GI, const Mat &GZ, const Mat &BZ, const Mat &BD, const Mat &GIR, const Mat &BI, const Mat &BIF, const Mat &Label, const Mat &Corner);
-		  
-		  //hyj0728 without density
 		  void saveimg(std::string base_folder, int file_index, const Mat &ProjI, const Mat &ProjZ, const Mat &ProjImf, const Mat &GI, const Mat &GZ, const Mat &BZ, const Mat &GIR, const Mat &BI, const Mat &BIF, const Mat &Label);
-		  
-		  void saveimg(std::string base_folder, int file_index, const Mat &ProjI, const Mat &ProjZ, const Mat &ProjD, const Mat &ProjImf, const Mat &GI, const Mat &GZ, const Mat &BZ, const Mat &BD, const Mat &GIR, const Mat &BI, const Mat &BIF, const Mat &Label); // ���� 1
-		  void saveimg(const Mat &ProjI, const Mat &ProjImf, const Mat &GI, const Mat &BI, const Mat &BIF, const Mat &Label); //���� 2
+		  void saveimg(std::string base_folder, int file_index, const Mat &ProjI, const Mat &ProjZ, const Mat &ProjD, const Mat &ProjImf, const Mat &GI, const Mat &GZ, const Mat &BZ, const Mat &BD, const Mat &GIR, const Mat &BI, const Mat &BIF, const Mat &Label); 
+		  void saveimg(const Mat &ProjI, const Mat &ProjImf, const Mat &GI, const Mat &BI, const Mat &BIF, const Mat &Label);
 
 		  int nx, ny; //pixel number
 		  int timin, tjmin; //truncated pixel no.
@@ -74,9 +71,9 @@ namespace roadmarking
 		  vector<vector<vector<int>>> CMatrixIndice;    //cloud
 		  vector<vector<vector<int>>> GCMatrixIndice;   //ground cloud
 		  vector<vector<vector<int>>> NGCMatrixIndice;  //non-ground cloud
-		  int totallabel; //���˺������ͨ����
-		  vector<vector <int>>  labelx;   //���label������X����
-		  vector<vector <int>>  labely;   //���label������Y����
+		  int totallabel; 
+		  vector<vector <int>>  labelx;  
+		  vector<vector <int>>  labely;  
 
 
 	protected:

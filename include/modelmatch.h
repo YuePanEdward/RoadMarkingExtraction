@@ -29,7 +29,7 @@ namespace roadmarking
 			heading_increment_ = heading_increment_0;
 		}// order: KeypointDetection's RadiusNonMax,tolerantEuclideanDis,tolerantHammingDis,tolerantMinOverlap ratio;
 
-		bool model_match(std::string model_file_path, vector<pcXYZI> &sceneclouds, RoadMarkings & roadmarkings);  // ģ��ƥ����������;  pathname: Model Folder's name
+		bool model_match(std::string model_file_path, vector<pcXYZI> &sceneclouds, RoadMarkings & roadmarkings);  // pathname: Model Folder's name
 
 	protected:
 
@@ -47,12 +47,11 @@ namespace roadmarking
 			
 
 		//Parameters
-
-		float tolerantMinOverlap_ =0.75;                                   
-		int iter_num_ = 10;
-		float heading_increment_ = 25.0;
-		float correct_match_fitness_thre_ =0.1;
-		float overlapDis_ = 0.15;                                              
+		float tolerantMinOverlap_;                                   
+		int iter_num_;
+		float heading_increment_ ;
+		float correct_match_fitness_thre_;
+		float overlapDis_;                                              
 
 	};
 }
