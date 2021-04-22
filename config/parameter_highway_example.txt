@@ -1,6 +1,6 @@
 1
-900.0
-0.08
+600.0
+0.05
 5.0
 2.5
 25
@@ -17,7 +17,7 @@ Parameters Notification
 2 point_density (expected average point density on road surface, X point/m^2) default: 900.0
 3 grid_resolution (projected grid size [unit:m]) default: 0.1
 4 intensity_scale (controls the value range of point intensity. Generally, the smaller the value is, the more markings are found, and the more noise are found accordingly). recommended: 2.0-8.0, default: 5.0
-5 density_threshold (describes the approximate number of ground points in a single pixel on the road) recommended: 2.5-5.0, default: 2.5
+5 density_threshold (describes the approximate number of ground points in a single pixel on the road) recommended: 2.0-5.0, default: 2.5
 6 rotation_increment_step  (controls the increase step size of the initial estimate of the rotation angle during template matching. The larger the value, the more robust the template matching, but the longer time it would take) recommended: 15-45, default: 25.0
 7 matching_fitness_thre (controls the error threshold during template matching. The larger the value, the lower the accuracy and the higher the recall) preferred: 0.01-0.05, default: 0.02
 8 overlaping_distance_thre (controls the search radius [unit:m] of neighboring points when calculating the template matching overlap ratio. The larger the value, the higher the overlap ratio would be) recommended: 0.1-0.2 default: 0.15

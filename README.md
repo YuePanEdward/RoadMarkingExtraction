@@ -27,7 +27,7 @@ cd ..
 
 3. Prepare the model pool (take `./model_pool/xxx` as an example) and configure the parameter list (take `./config/xxx.txt` as an example).
 
-4. Configure the input (`*.las` point cloud) and output path in `./script/run_xxx.sh`.
+4. Configure the input (`*.las` or `*.pcd` point cloud) and output path in `./script/run_xxx.sh`.
 
 5. Run `sh ./script/run_xxx.sh`. 
 

@@ -109,6 +109,8 @@ namespace roadmarking
 	void Csegmentation::cloudFilter(const vector<pcXYZI> &inclouds, vector<pcXYZI> &outSORclouds, int N, int MeanK, double std)
 	{
 		int cloudnumber = inclouds.size();
+        cout<< "Candidate segement number: "<< cloudnumber<<endl;
+
 		vector<pcXYZI> outclouds;
 
 		outclouds.resize(cloudnumber);
@@ -303,17 +305,17 @@ namespace roadmarking
 
 		double angt1, angt2, lt1, lt2, lt3, lt4, lt5, ratio1, ratio2;
 
-		angt1 = 1.25;
-		angt2 = 30;
+		angt1 = 1.0;
+		angt2 = 45;
 
-		lt1 = 0.04;
+		lt1 = 0.03;
 		lt2 = 0.6;
 		lt3 = 3.0;
 		lt4 = 8.5;
-		lt5 = 0.35;
+		lt5 = 0.4;
 	
-		ratio1 = 1.3;
-		ratio2 = 1.45;
+		ratio1 = 1.35;
+		ratio2 = 1.5;
 		for (int i = 0; i < boundingfeatures.size(); i++)
 		{
 			bool rough_classified = false;

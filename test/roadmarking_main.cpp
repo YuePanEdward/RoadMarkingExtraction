@@ -15,15 +15,15 @@ int main(int argc, char *argv[])
 {
     if (argc < 3)
     {
-       printf("Syntax is: %s input_file.las output_folder [model_pool] [config_file]\n", argv[0]);
-       return (-1);
+        printf("Syntax is: %s input_file.las output_folder [model_pool] [config_file]\n", argv[0]);
+        return (-1);
     }
     std::string inputFilePath = argv[1];
     std::string outputFolderPath = argv[2];
     std::string model_path = "./model_pool/models_urban_example/";
     std::string parm_file = "./config/parameter_urban_example.txt";
-    
-    if(argc==3)
+
+    if (argc == 3)
         printf("Model pool path and configuration file are not specified, use the default model pool and parameters.\n");
     if (argc == 4)
     {
@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
         model_path = argv[3];
         parm_file = argv[4];
     }
-       
+
     /*-------------------------------------------------Readme----------------------------------------------------*/
     //[Road Markings Extraction, Classification and Vectorization]
     //Brief: Roadmarking extraction, classification (long sidelines, short dash lines, all kinds of arrows,
@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
     //localization information
     //Implementation:
     //Dependent 3rd Party Libs: Eigen 3, PCL 1.7, OpenCV 2, Liblas, GDAL(optional), LASLib(optional)
-    //Point Cloud Acquisition Platform: mainly MLS 
+    //Point Cloud Acquisition Platform: mainly MLS
     //Application Scenarios: Highway, Urban Road
     //Author: Yue Pan et al. @ WHU
     /*-----------------------------------------------------------------------------------------------------------*/
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     //Step 1
     DataIo io; // Data IO class
     //string foldername, paralistfile;    // Las Data folder name ; Parameter list file name
-    string filename = inputFilePath.substr(inputFilePath.rfind('/'));                                      
+    string filename = inputFilePath.substr(inputFilePath.rfind('/'));
     int datatype, roadtype, is_road_extracted; // datatype: (1.MLS/TLS 2.ALS) ;  roadtype: (1.Highway 2.City Road) ; density: approximate point number per m^2
     float resolution;                          // Projection Image's pixel size (m)
 
@@ -75,13 +75,12 @@ int main(int argc, char *argv[])
     roadtype = io.paralist.road_type;
     float density = io.paralist.expected_point_num_per_m_square;
     resolution = io.paralist.grid_resolution;
-    if(io.paralist.visualization_on)
-        cout<<"Visualization on"<<endl;
+    if (io.paralist.visualization_on)
+        cout << "Visualization on" << endl;
 
     io.displayparameter(datatype, roadtype, is_road_extracted);
 
     t1 = clock();
-    
 
     cout << "-------------------------------------------------------------" << endl;
     cout << "Processing File : " << inputFilePath << endl;
@@ -92,9 +91,9 @@ int main(int argc, char *argv[])
     pcXYZIPtr cloud(new pcXYZI());   // Original point clouds
     vector<double> CloudBoundingBox; // Xmin,Ymin,Zmin,Xmax,Ymax,Zmax after translation for Input point cloud;
     Bounds bound_3d_temp;
-    double X_origin, Y_origin; // X,Y origin before translation;
+    double X_origin =0.0, Y_origin=0.0; // X,Y origin before translation;
     //Step 2,3
-    pcXYZIPtr fcloud(new pcXYZI()); // Sampled point cloud
+    pcXYZIPtr fcloud(new pcXYZI());  // Sampled point cloud
     pcXYZIPtr ngcloud(new pcXYZI()); // Non-ground point cloud
     pcXYZIPtr gcloud(new pcXYZI());  // Ground point cloud
     //Step 4
@@ -111,12 +110,19 @@ int main(int argc, char *argv[])
     vector<bool> is_rights;                                              // Unit of Arrow Road markings' direction
 
     //Step 1. Data Import
-    io.readLasFile(inputFilePath, *cloud, bound_3d_temp);
+    string extension = inputFilePath.substr(inputFilePath.find_last_of('.') + 1); //Get the suffix of the file;
+    if (!strcmp(extension.c_str(), "las"))
+        io.readLasFile(inputFilePath, *cloud, bound_3d_temp);
+    else if (!strcmp(extension.c_str(), "pcd"))
+        io.readPcdFile(inputFilePath, cloud, bound_3d_temp);
+    else 
+        printf("Unrecognized data format. Please use *.pcd or *.las format point cloud.\n");
+    
     X_origin = 0.5 * (bound_3d_temp.min_x + bound_3d_temp.max_x);
-    Y_origin = 0.5 * (bound_3d_temp.min_y + bound_3d_temp.max_y);
+    Y_origin = 0.5 * (bound_3d_temp.min_y + bound_3d_temp.max_y); 
     cout << "Import [" << cloud->size() << "] points." << endl;
     printf("Global shift (X: %8.3f m, Y: %8.3f m)\n", -X_origin, -Y_origin);
-  
+
     std::chrono::steady_clock::time_point tic = std::chrono::steady_clock::now();
 
     //Step 2. Voxel Down-sampling (Optional)
@@ -142,7 +148,6 @@ int main(int argc, char *argv[])
 
     //Method 2: PMF (Slow)
     //seg.GroundFilter_PMF(cloud[i], gcloud, ngcloud);
-    
 
     Csegmentation seg(resolution);
     //Preprocessing: Segmentation and Fitting (Optional)
@@ -159,7 +164,7 @@ int main(int argc, char *argv[])
     //Step 4. 3D->2D projection, Generating Projection Image
     Imageprocess ip;
     ip.savepcgrid(bound_3d_temp, resolution, cloud, gcloud, ngcloud); //get image size and save point indices in each pixel
-    
+
     //For better efficiency (without ground segmentation), you can replace gcloud and ngcloud with cloud
     //[0:Original Cloud, 1 : Ground Cloud, 2 : Non - ground Cloud]
     // Image 1
@@ -178,7 +183,7 @@ int main(int argc, char *argv[])
     //Step 5. Image Processing
     //5.1.1 Median filter  (Optional)
     // Image 4
-    if (datatype == 1)                             // For MLS
+    if (datatype == 1)               // For MLS
         medianBlur(imgI, imgImf, 3); // Remove the salt and pepper noise
     else if (datatype == 2)
         imgImf = imgI; // For ALS
@@ -197,7 +202,7 @@ int main(int argc, char *argv[])
     if (datatype == 1)
     {
         // Image 8
-        imgDbinary = ip.maxEntropySegMentation(imgD);                                    // for MLS
+        imgDbinary = ip.maxEntropySegMentation(imgD); // for MLS
         // Image 9
         imgIgradientroad = ip.ExtractRoadPixelIZD(imgIgradient, imgZbinary, imgDbinary); //Use the slope and point density as the criterion
     }
@@ -226,13 +231,13 @@ int main(int argc, char *argv[])
 		morphologyEx(imgIbfilter, closeImg, MORPH_CLOSE, element);
 		//dilate(imgIbfilter, dilateImg, Mat(),element);
 		//erode(dilateImg, closeImg, Mat());  // ->closeImg*/
-    
+
     // Image 11
     //ip.CcaBySeedFill(Timg, labelImg);
     ip.CcaBySeedFill(imgFilled, labelImg); //CCA: Seed filling method with 8 neighbor
     //ip.CcaByTwoPass(imgFilled, labelImg);   //CCA: Two pass method with 4 neighbor (Alternative)
 
-    // Image 12 
+    // Image 12
     ip.LabelColor(labelImg, colorLabelImg); //CCA Labeling and Truncation
 
     //5.4 Harris / Shi-Tomasi Corner Detection (Optional)
@@ -250,8 +255,10 @@ int main(int argc, char *argv[])
     seg.cloudFilter(outclouds, outcloud_otsu_sor, 256, 10, 2.5); // Three parameters: the first is for the histogram level of Otsu Thresholding , the second is for SOR neighbor number and the third is for SOR std threshold
 
     //Delete point clouds whose point number is less than a threshold
-    if (datatype == 1) seg.NFilter(outcloud_otsu_sor, outcloud_otsu_sor_n, density / 15);  //the last parameter is set as the point number threshold for each cloud
-    else seg.NFilter(outcloud_otsu_sor, outcloud_otsu_sor_n, 10);
+    if (datatype == 1)
+        seg.NFilter(outcloud_otsu_sor, outcloud_otsu_sor_n, density / 15); //the last parameter is set as the point number threshold for each cloud
+    else
+        seg.NFilter(outcloud_otsu_sor, outcloud_otsu_sor_n, 10);
 
     cout << "Roadmarking pixels --> roadmarking point cloud done.\n";
 
@@ -310,8 +317,8 @@ int main(int argc, char *argv[])
         boost::filesystem::create_directory(output_sub_folder);
 
     // Output Images
-    ip.saveimg(output_sub_folder+"/Geo-referenced_Image", 0, imgI, imgZ, imgD, imgImf, imgIgradient, imgZgradient, imgZbinary, imgDbinary, imgIgradientroad, imgIbinary, imgFilled, colorLabelImg); //Saving the Images
-    
+    ip.saveimg(output_sub_folder + "/Geo-referenced_Image", 0, imgI, imgZ, imgD, imgImf, imgIgradient, imgZgradient, imgZbinary, imgDbinary, imgIgradientroad, imgIbinary, imgFilled, colorLabelImg); //Saving the Images
+
     // Output pointcloud
     // You can view the results in CloudCompare or AutoDesk Recap
     // io.writePcdAll(outputFilePath+"/Filtered_Labeled_Clouds", "filtered_labeled.pcd", outcloud_otsu_sor_n);
@@ -321,18 +328,18 @@ int main(int argc, char *argv[])
     //Output vectorization results
     //You can view the results on https://beta.sharecad.org/ or in AutoCAD
     io.writemarkVectDXF(0, output_sub_folder + "/Vectorized_Road_Markings", roadmarkings, sideline_roadmarkings, X_origin, Y_origin); //*.dxf format
-    //io.writeRoadmarkingShpWithOffset(outputFilePath, roadmarkings_vect, i, X_origin, Y_origin); //*.shp format 
+    //io.writeRoadmarkingShpWithOffset(outputFilePath, roadmarkings_vect, i, X_origin, Y_origin); //*.shp format
 
     //timing
     std::cout << "Process file [" << inputFilePath << "] done in [" << time_used.count() << "] s.\n";
 
-    //Display Results 
+    //Display Results
     if (io.paralist.visualization_on)
     {
-    	//io.displayroad(ngcloud, gcloud);                                              //Display non-ground and ground cloud
-    	io.displaymarkwithng(outcloud_otsu_sor_n, ngcloud);                             //Display road markings point clouds with non-ground cloud
-    	io.displaymarkbycategory(outcloud_otsu_sor_n, roadmarkings);                    //Display road markings point clouds rendered by category
-    	//io.displaymarkVect(roadmarkings, sideline_roadmarkings);                        //Display vectorized road markings
+        //io.displayroad(ngcloud, gcloud);                                              //Display non-ground and ground cloud
+        io.displaymarkwithng(outcloud_otsu_sor_n, ngcloud);          //Display road markings point clouds with non-ground cloud
+        io.displaymarkbycategory(outcloud_otsu_sor_n, roadmarkings); //Display road markings point clouds rendered by category
+                                                                     //io.displaymarkVect(roadmarkings, sideline_roadmarkings);                        //Display vectorized road markings
     }
 
     return 1;

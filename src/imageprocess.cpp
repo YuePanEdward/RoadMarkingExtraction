@@ -47,7 +47,7 @@ namespace roadmarking
 
 		cout << "Image Size: " << nx << " x " << ny << endl;
 
-		if(nx * ny > 1e7)
+		if(nx * ny > 2e7)
 			cout<<"Warning: Too much grid map, the system may run out of memory."<<endl;
 
 		CMatrixIndice.resize(nx, vector<vector<int>>(ny, vector<int>(0)));

@@ -8,10 +8,10 @@ using namespace roadmarking;
 Ground_Extraction::Ground_Extraction() 
 {
 	//use the default value
-	grid_res_ = 3.0;       
-	min_pt_num_grid_ = 100;     
-	max_height_diff_ = 0.4; 
-	max_nei_height_diff_= 1.8;
+	grid_res_ = 1.5;       
+	min_pt_num_grid_ = 50;     
+	max_height_diff_ = 0.25; 
+	max_nei_height_diff_= 1.0;
 }
 
 void  Ground_Extraction::Get_grid(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud,

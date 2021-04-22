@@ -83,6 +83,7 @@ namespace roadmarking
 
 		//pcd file
 		bool readPcdFile(const string &fileName, const pcXYZIPtr &pointCloud);
+		bool readPcdFile(const string &fileName, const pcXYZIPtr &pointCloud, Bounds &bound_3d);
 		bool writePcdFile(const string &fileName, const pcXYZIPtr &pointCloud);
 		bool writePcdFile(const string &fileName, const pcXYZRGBPtr &pointCloud);
 		bool writePcdAll(const string &foldername, const string &fileName, const vector<pcXYZI> &pointClouds);
@@ -118,7 +119,6 @@ namespace roadmarking
 		bool writemarkVectTXT(const RoadMarkings &roadmarkings);
 
 		//dxf file
-		bool writemarkVectDXF(const RoadMarkings &roadmarkings);
 		bool writemarkVectDXF(int file_index, const std::string &foldername, const RoadMarkings &roadmarkings, const RoadMarkings &sideline_markings,
 							  double d_X, double d_Y);
 

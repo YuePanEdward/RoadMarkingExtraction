@@ -348,16 +348,38 @@ namespace roadmarking
 		return true;
 	}
 
+    
 	bool DataIo::readPcdFile(const std::string &fileName, const pcXYZIPtr &pointCloud)
 	{
 		pcl::console::setVerbosityLevel(pcl::console::L_ALWAYS); //Ban pcl warnings
 
-		if (pcl::io::loadPCDFile(fileName, *pointCloud) == -1) //* load the file
+		if (pcl::io::loadPCDFile<pcl::PointXYZI>(fileName, *pointCloud) == -1) //* load the file
 		{
 			PCL_ERROR("Couldn't read file\n");
 			return false;
 		}
 
+		return true;
+	}
+
+	bool DataIo::readPcdFile(const std::string &fileName, const pcXYZIPtr &pointCloud, Bounds &bound_3d)
+	{
+		pcl::console::setVerbosityLevel(pcl::console::L_ALWAYS); //Ban pcl warnings
+		//intensity should be stored as 'intensity' (lower case i) field instead of 'Intensity' in the pcd file
+		//reference: http://www.danielgm.net/cc/forum/viewtopic.php?t=4540
+		if (pcl::io::loadPCDFile<pcl::PointXYZI>(fileName, *pointCloud) == -1) //* load the file
+		{
+			PCL_ERROR("Couldn't read file\n");
+			return false;
+		}
+		if (pointCloud->points[0].intensity==0) //check if the intensity exsit
+			printf("Warning! Point cloud intensity may not be imported properly, check the scalar field's name.\n");
+		getCloudBound(pointCloud, bound_3d);
+		for (int i=0; i<pointCloud->size(); i++) //shift the center point to the origin of the coordinate system
+	    {
+			pointCloud->points[i].x -= (0.5*(bound_3d.min_x+bound_3d.max_x));
+			pointCloud->points[i].y -= (0.5*(bound_3d.min_y+bound_3d.max_y));
+		}
 		return true;
 	}
 
@@ -1749,10 +1771,11 @@ namespace roadmarking
 			pt.x = p.GetX() - center_x;
 			pt.y = p.GetY() - center_y;
 			pt.z = p.GetZ();
-			pt.intensity = p.GetIntensity();
-
+			pt.intensity = p.GetIntensity(); //The scalar field should be stored as exactly "Intensity" (captial I) in the las file
 			pointCloud.points.push_back(pt);
 		}
+		if (pointCloud.points[0].intensity==0) //check if the intensity exsit
+			printf("Warning! Point cloud intensity may not be imported properly, check the scalar field's name.\n");
 
 		return 1;
 	}
